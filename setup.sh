@@ -12,6 +12,7 @@ do
 done
 
 echo "[+] zsh setup."
+chsh -s $(which zsh)
 echo "[+] downlding oh-my-zsh installer"
 curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -o /tmp/zsh-install.sh
 echo "[+] preventing installer from starting zsh"
