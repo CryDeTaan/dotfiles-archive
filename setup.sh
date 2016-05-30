@@ -38,7 +38,4 @@ curl -fsSL https://raw.githubusercontent.com/leonjza/dotfiles/master/vimrc -o ~/
 echo "[+] running vundle PluginInstall"
 vim +PluginInstall +qall
 
-echo "[+] tmux setup"
-curl -fsSL https://raw.githubusercontent.com/leonjza/dotfiles/master/tmux.conf -o ~/.tmux.conf
-
 echo "[!] DONE"
