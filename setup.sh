@@ -23,7 +23,7 @@ git clone git://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/cu
 echo "[+] installing zsh-autosuggestions"
 git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 echo "[+] downloading .zshrc"
-curl -fsSL https://raw.githubusercontent.com/leonjza/dotfiles/master/zshrc -o ~/.zshrc
+curl -fsSL https://raw.githubusercontent.com/CryDeTaan/dotfiles/master/zshrc -o ~/.zshrc
 echo "[+] cleaning up the downloaded installer"
 rm -f /tmp/zsh-install.sh
 
@@ -34,7 +34,7 @@ git clone https://github.com/gmarik/Vundle.vim ~/.vim/bundle/Vundle.vim
 echo "[+] downloading molokai colorscheme"
 git clone https://github.com/tomasr/molokai ~/.vim/bundle/molokai
 echo "[+] downloading .vimrc"
-curl -fsSL https://raw.githubusercontent.com/leonjza/dotfiles/master/vimrc -o ~/.vimrc
+curl -fsSL https://raw.githubusercontent.com/CryDeTaan/dotfiles/master/vimrc -o ~/.vimrc
 echo "[+] running vundle PluginInstall"
 vim +PluginInstall +qall
 
