@@ -472,4 +472,4 @@ fi
 if [[ "$update" = true ]]; then
     echo "Running repo update"
     update_repo
-file
+fi
