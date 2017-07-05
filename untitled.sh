@@ -1,0 +1,572 @@
+#!/bin/bash
+
+# Dotfiles install helper.
+#   2016 @leonjza
+
+# This script is structured in the following way:
+#
+#   Default variable values such as git path & commandline arguments
+#   Helper functions such as color output
+#   Function definitions with the *actual* logic
+#   Small helper to ensure the commands needed for this installer is available
+#   Commandline argument parser at the bottom to decide what gets called
+#
+#   For more, see the README file at $gitorigin
+
+set -e
+
+# static variables
+gitpath="$HOME/.dotfiles"
+gitorigin="https://github.com/leonjza/dotfiles.git"
+debug=false
+
+# configurations this script knows how to setup
+declare -a configurations=("all" "none" "zsh" "vim" "tmux" "gdb")
+
+# defaults for commandline options
+install_target=false
+uninstall_target=false
+update=false
+showusage=false
+
+# defaults for file & config locations
+oh_my_zsh="$HOME/.oh-my-zsh"
+zsh_rc="$HOME/.zshrc"
+vim_plugin_dir="$HOME/.vim"
+vim_rc="$HOME/.vimrc"
+tmux_conf="$HOME/.tmux.conf"
+gdb_init="$HOME/.gdbinit"
+rc_backup_dir="$HOME/.dotfiles.d/backups"
+
+# helper functions
+# colors!
+function echo() { command echo -e " * $*"; }
+function echo_green() { command echo -e "$(tput setaf 2; tput bold)$*$(tput sgr0)"; }
+function echo_red() { command echo -e "$(tput setaf 1)$*$(tput sgr0)"; }
+function echo_yellow() { command echo -e "$(tput setaf 3)$*$(tput sgr0)"; }
+function echo_debug() { if [ "$debug" = true ]; then command echo -e "$(tput setaf 3; tput bold)>>> $*$(tput sgr0)"; fi }
+# directories!
+function pushd() { command pushd "$@" > /dev/null; }
+function popd() { command popd "$@" > /dev/null; }
+# curl
+function curl() { command curl -fsSL "$1" -o "$2"; }
+
+# app logic
+function usage() {
+
+    cat <<EOF
+    Dotfiles installer/updater
+        2016 @leonjza
+
+    Usage: install [option] [configs]
+
+    Examples:
+        install --install all
+        install --install vim
+        install --remove all
+        install --remove vim
+        install --update all
+        install --check all
+
+    Options:
+        -i, --install [configs]     Install configurations (See Valid Configs)
+        -r, --remove [configs]      Uninstall configurations (See Valid Configs)
+        -u, --update all            Update the configuration repository
+
+    Valid Configs:
+        ${configurations[@]}
+EOF
+
+}
+
+function prepare_git() {
+
+    echo_debug "Preparing git folder at: $gitpath"
+
+    # if there is already a file called .dotfiles, error out for manual inspection
+    if [[ -f $gitpath ]]; then
+
+        echo_red "$gitpath appears to be an existing file. Inspect/remove it first!"
+        exit 1
+
+    fi
+
+    # if the path does not exist, just clone there. easy.
+    if [[ ! -d $gitpath ]]; then
+
+        echo_yellow "Git repo in $gitpath does not exist. Cloning dotfiles repository: $gitorigin"
+        git clone $gitorigin $gitpath
+        return
+
+    fi
+
+    # some more work is needed to to see if the repo is sane
+    echo_debug "$gitpath exists, inspecting it."
+    pushd $gitpath
+
+    # check if we are inside a valid git repository
+    valid_repo=$(set +e; git rev-parse --is-inside-work-tree 2>/dev/null; set -e)
+    if [[ ! "$valid_repo" = true ]]; then
+
+        echo_red "$gitpath is a directory, but not a valid git repository. Move/delete it to continue."
+        exit 1
+
+    fi
+
+    # get the remote origin of the existing repository and check it
+    localorigin=$(git config --get remote.origin.url)
+    echo_debug "Local git origin is: $localorigin"
+
+    if [[ ! "$localorigin" = $gitorigin ]]; then
+
+        echo_red "It looks like the origin for the local dotfiles repo does not match."
+        echo_red "The local origin is $localorigin and it should be $gitorigin"
+        exit 2
+
+    fi
+
+    popd
+
+    echo_green "Git repository at $gitpath looks OK"
+
+}
+
+function validate_configuration() {
+
+    local seeking=$1
+    echo_debug "Looking for '$seeking' in the valid configurations.."
+    for element in "${configurations[@]}"; do
+
+        if [[ "$element" == "$seeking" ]]; then
+            echo "Configuration '$seeking' looks OK"
+            return
+        fi
+
+    done
+
+    echo_red "$seeking is not a valid configuration"
+    exit 1
+
+}
+
+function backup_config() {
+
+    local config=$1
+
+    # add a date to the config file
+    local filename=$(basename $config-$(date +"%s"))
+
+    # make sure the backup dir exists
+    mkdir -p $rc_backup_dir
+
+    # copy the config file to the backup dir
+    echo_green "Backing up config file $config"
+    echo_debug "Config backup goes to $rc_backup_dir/$filename"
+    cp -f $config $rc_backup_dir/$filename
+
+}
+
+function restore_config() {
+
+    local config=$1
+    local base=$(basename $config)
+
+    # search for the latest backup in the backup directory
+    filename=$(ls -a $rc_backup_dir | grep $base | sort -n -t _ -k 2 | tail -1)
+    echo_debug "Backupfile lookup returned: $filename"
+
+    if [[ ! "$filename" == "" ]]; then
+
+        echo_green "Restoring last backup of $base to $config which is $filename"
+        cp -f $rc_backup_dir/$filename $config
+
+    else
+        echo_yellow "No backup of $config could be found. nothing to restore."
+    fi
+}
+
+function install_components() {
+
+    # check that the install target is something we know if
+    validate_configuration $install_target
+
+    # Ensure that we have the source repository ready in $gitpath
+    prepare_git
+    echo_debug "Installing: $install_target"
+
+    case $install_target in
+        none)
+            echo_yellow "Installing nothing..."
+            return
+        ;;
+        all)
+            install_zsh
+            install_vim
+            install_tmux
+            install_gdb
+        ;;
+        zsh)
+            install_zsh
+        ;;
+        vim)
+            install_vim
+        ;;
+        tmux)
+            install_tmux
+        ;;
+        gdb)
+            install_gdb
+        ;;
+    esac
+
+}
+
+function install_zsh() {
+
+    local temp="$(mktemp)"
+    echo_green "Installing ZSH configuration"
+
+    # make sure zsh is available
+    if ! hash zsh 2>/dev/null; then
+        echo_red "zsh is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    # Ensure that *.d directory exists
+    echo_debug "Creating *.d directory in $HOME/.dotfiles.d/zshrc.d"
+    mkdir -p $HOME/.dotfiles.d/zshrc.d
+
+    echo "Downloading oh-my-zsh installer"
+    echo_debug "Saving installer to $temp"
+    curl "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" $temp
+
+    echo_debug "Preventing the installer from starting ZSH when its done"
+    sed -i -r "s/env zsh//" $temp
+
+    echo "Running oh-my-zsh installer..."
+    echo_debug "Using sh to run $temp"
+    sh $temp
+    echo_debug "Removing downloaded installer"
+    rm -f $temp
+
+    echo "Installing plugins"
+    echo_debug "Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
+
+    # Syntax highlighting
+    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
+        git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
+    else
+        echo_yellow "Syntax highligthing plugin already exists."
+    fi
+
+    # Auto suggestions
+    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-autosuggestions" ]]; then
+        git clone git://github.com/zsh-users/zsh-autosuggestions $oh_my_zsh/custom/plugins/zsh-autosuggestions
+    else
+        echo_yellow "Autosuggestions plugin already exists."
+    fi
+
+    echo "Installing Zsh configuration file"
+
+    ## Backup the current one
+    if [[ -f "$zsh_rc" ]]; then
+        backup_config $zsh_rc
+    fi
+
+    echo_debug "Symlinking $gitpath/rc/zshrc to $zsh_rc"
+    ln -sf $gitpath/rc/zshrc $zsh_rc
+
+    echo "Symlinking *.zsh files to $HOME/.dotfiles.d/zshrc.d/"
+    ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d
+
+    echo_green "ZSH config install complete!"
+
+}
+
+function install_vim() {
+
+    echo_green "Installing Vim configuration"
+
+    # make sure vim is available
+    if ! hash vim 2>/dev/null; then
+        echo_red "vim is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    # Ensure that *.d directory exists
+    echo_debug "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
+    mkdir -p $HOME/.dotfiles.d/vimrc.d
+
+    echo_debug "Preparing the vim plugin directory at $vim_plugin_dir"
+    mkdir -p $vim_plugin_dir
+
+    echo "Installing Vim Plugins"
+
+    # Vundle
+    if [[ ! -d "$vim_plugin_dir/bundle/Vundle.vim" ]]; then
+        git clone https://github.com/gmarik/Vundle.vim $vim_plugin_dir/bundle/Vundle.vim
+    else
+        echo_yellow "Vundle already exists."
+    fi
+
+    # Molokai
+    if [[ ! -d "$vim_plugin_dir/bundle/molokai" ]]; then
+        git clone https://github.com/tomasr/molokai $vim_plugin_dir/bundle/molokai
+    else
+        echo_yellow "Molokai color scheme already exists."
+    fi
+
+    echo "Installing Vim configuration file"
+
+    ## Backup the current one
+    if [[ -f "$vim_rc" ]]; then
+        backup_config $vim_rc
+    fi
+
+    echo_debug "Symlinking $gitpath/rc/vimrc to $vim_rc"
+    ln -sf $gitpath/rc/vimrc $vim_rc
+
+    echo "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
+    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
+
+    echo "Running vim plugin installer"
+    vim +PluginInstall +qall
+
+    echo_green "Vim config install complete!"
+
+}
+
+function install_tmux() {
+
+    echo_green "Installing Tmux configuration"
+
+    # make sure tmux is available
+    if ! hash tmux 2>/dev/null; then
+        echo_red "tmux is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    echo "Installing Tmux configuration file"
+
+    ## Backup the current one
+    if [[ -f "$tmux_conf" ]]; then
+        backup_config $tmux_conf
+    fi
+
+    echo_debug "Symlinking $gitpath/rc/tmux.conf to $tmux_conf"
+    ln -sf $gitpath/rc/tmux.conf $tmux_conf
+
+    echo_green "Tmux config install complete!"
+}
+
+function install_gdb() {
+
+    local pedaorigin="https://github.com/longld/peda.git"
+    local peda_home="$HOME/.peda"
+
+    echo_green "Installing Gdb configuration"
+
+    # make sure gdb is available
+    if ! hash gdb 2>/dev/null; then
+        echo_red "gdb is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    echo "Installing Gdb configuration"
+
+    ## Backup the current one
+    if [[ -f "$gdb_init" ]]; then
+        backup_config $gdb_init
+    fi
+
+    echo "Cloning & Installing Peda from $pedaorigin"
+    if [[ ! -d $peda_home ]]; then
+
+        echo_debug "Running git clone $pedaorigin $peda_home"
+        git clone $pedaorigin $peda_home
+
+    else
+
+        echo_yellow "Peda appears to already be installed"
+
+        # Check that it actually *is* peda.
+        if [[ ! -f $peda_home/peda.py ]]; then
+            echo_red "The directory $peda_home already exists, but does not look like Peda from $pedaorigin. Backing out."
+            return
+        fi
+
+    fi
+
+    echo_debug "Adding source to .gdbinit"
+    command echo "source $peda_home/peda.py" > $gdb_init
+
+    ## Add extra gdbinit configuration if we are running Sierra
+    if hash sw_vers 2>/dev/null; then
+
+        echo_debug "macOS detected. Checking for version 10.12"
+
+        if [[ $(sw_vers -productVersion) == *"10.12"* ]]
+        then
+            echo_green "Adding 'startup-with-shell off' to gdbinit for macOS Sierra"
+            command echo "set startup-with-shell off" >> ~/.gdbinit
+        fi
+    fi
+
+    echo_green "Gdb config install complete!"
+
+}
+
+function uninstall_components() {
+
+    # check that the uninstall target is something we know if
+    validate_configuration $uninstall_target
+
+    # Ensure that we have the source repository ready in $gitpath
+    echo_debug "Uninstalling: $uninstall_target"
+
+    case $uninstall_target in
+        none)
+            echo_yellow "Uninstalling nothing..."
+            return
+        ;;
+        all)
+            echo_yellow "Uninstalling everything"
+
+            # restore the shell back to bash
+            echo "Changing your shell back to bash!"
+            chsh -s $(grep /bash$ /etc/shells | tail -1)
+
+            rm -Rf $oh_my_zsh
+            rm -f $zsh_rc
+            echo "Attempting to restore a backup zshrc if it exists"
+            restore_config $zsh_rc
+
+            rm -Rf $vim_plugin_dir
+            rm -f $vim_rc
+            echo "Attempting to restore a backup vimrc if it exists"
+            restore_config $vim_rc
+
+            rm -f $tmux_conf
+            echo "Attempting to restore a backup tmux.conf if it exists"
+            restore_config $tmux_conf
+
+            rm -f $gdb_init
+            rm -Rf $peda_home
+            echo "Attempting to restore a backup gdbinit if it exists"
+            restore_config $gdb_init
+
+            echo_red "Removing source dotfiles repository $gitpath"
+            rm -Rf $gitpath
+
+            echo_yellow "User confirgurations in $HOME/.dotfiles.d have been left behind!"
+        ;;
+        zsh)
+            # restore the shell back to bash
+            echo "Changing your shell back to bash!"
+            chsh -s $(grep /bash$ /etc/shells | tail -1)
+
+            rm -Rf $oh_my_zsh
+            rm -f $zsh_rc
+            echo "Attempting to restore a backup zshrc if it exists"
+            restore_config $zsh_rc
+        ;;
+        vim)
+            rm -Rf $vim_plugin_dir
+            rm -f $vim_rc
+            echo "Attempting to restore a backup vimrc if it exists"
+            restore_config $vim_rc
+        ;;
+        tmux)
+            rm -f $tmux_conf
+            echo "Attempting to restore a backup tmux.conf if it exists"
+            restore_config $tmux_conf
+        ;;
+        gdb)
+            rm -f $gdb_init
+            rm -Rf $peda_home
+            echo "Attempting to restore a backup gdbinit if it exists"
+            restore_config $gdb_init
+        ;;
+    esac
+
+}
+
+function update_repo() {
+
+    prepare_git
+
+    echo_debug "Running git pull on $gitpath"
+    pushd $gitpath
+    git pull
+    popd
+
+    echo "Updating symlinks"
+
+    if [[ -d "$HOME/.dotfiles.d/zshrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d; fi
+    if [[ -d "$HOME/.dotfiles.d/vimrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d; fi
+
+    echo_green "Update complete. You may want to close/re-open your session for changes to take effect."
+}
+
+# start by checking the software needed by this installer
+# if we cant find it, rather die
+for cmd in "curl" "git"; do
+
+    if ! hash $cmd 2>/dev/null; then
+        echo_red "'$cmd' can not be found. Please install it before using this script."
+        exit 2
+    fi
+    echo_debug "Using $cmd from $(which $cmd)"
+
+done
+
+# parse commandline arguments
+if [[ $# -gt 1 ]]; then
+
+    while [[ $# -gt 1 ]]; do
+        case $1 in
+        -i|--install)
+        install_target="$2"
+        shift # past argument
+        ;;
+        -r|--remove)
+        uninstall_target="$2"
+        shift # past argument
+        ;;
+        -u|--update)
+        update=true
+        shift # past argument
+        ;;
+        *)
+        showusage=true
+        ;;
+    esac
+
+    shift # past argument or value
+    done
+else
+    echo_debug "Running usage(), no args -gt 1 found"
+    usage
+fi
+
+# usage
+if [ "$showusage" = true ]; then
+    usage
+    exit 2
+fi
+
+# install
+if [[ ! "$install_target" = false ]]; then
+    echo "Running install on: $install_target"
+    install_components
+fi
+
+if [[ ! "$uninstall_target" = false ]]; then
+    echo "Running uninstall on: $uninstall_target"
+    uninstall_components
+fi
+
+if [[ "$update" = true ]]; then
+    echo "Running repo update"
+    update_repo
+file
