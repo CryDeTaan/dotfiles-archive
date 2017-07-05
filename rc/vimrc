@@ -1,0 +1,39 @@
+" ------------Vimrc------------ "
+" This is the vim rc configuration file. 
+" All setting will be instantiated from
+" from this file.
+"
+" Most settings will really be made
+" from outside of this file.
+" 
+" Here we will set some initial items and then load all 
+" the custom config files afterwards.
+
+
+" ------------Vundle----------- "
+
+" Some settings required by Vundle before loading plugins.
+
+set nocompatible              " required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+
+
+" ------------Config----------- "
+
+" Here we will load custom configuration.
+" To add extra configurations, add the files: 
+"   ~/.dotfiles.d/vimrc.d/
+" NOTE:
+" Number the files in the order you want it loaded, 
+" By default files will be loaded randomly.
+" The file name should end with .vim to load correctly.
+" For Example:
+"   00-VundlePlugins.vim
+"   01-General.vim	 
+
+for f in split(glob('~/.dotfiles.d/vimrc.d/*.vim'), '\n')
+    exe 'source' f
+endfor

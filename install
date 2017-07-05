@@ -1,0 +1,367 @@
+#!/bin/bash
+
+# Dotfiles installer.
+#   Based on https://github.com/leonjza/dotfiles. Shouts to @leonjza
+#   In truth its probably a copy, not based of anything 
+
+# This script is structured in the following way:
+#
+#   Default variable values such as git path & commandline arguments
+#   Helper functions such as color output
+#   Function definitions with the *actual* logic
+#   Small helper to ensure the commands needed for this installer is available
+#   Commandline argument parser at the bottom to decide what gets called
+#
+#   For more, see the README file at $gitorigin
+
+set -e  
+
+# static variables
+gitpath="$HOME/.dotfiles"
+gitorigin="https://github.com/CryDeTaan/dotfiles.git"
+debug=false
+
+# configurations this script knows how to setup
+declare -a configurations=("all" "none" "zsh" "vim")
+
+# defaults for commandline options
+install_target=false
+uninstall_target=false
+update=false
+showusage=false
+
+# defaults for file & config locations
+oh_my_zsh="$HOME/.oh-my-zsh"
+zsh_rc="$HOME/.zshrc"
+vim_plugin_dir="$HOME/.vim"
+vim_rc="$HOME/.vimrc"
+rc_backup_dir="$HOME/.dotfiles.d/backups"
+
+# helper functions
+# colors!
+function echo() { command echo -e " * $*"; }
+function echo_green() { command echo -e "$(tput setaf 2; tput bold)$*$(tput sgr0)"; }
+function echo_red() { command echo -e "$(tput setaf 1)$*$(tput sgr0)"; }
+function echo_yellow() { command echo -e "$(tput setaf 3)$*$(tput sgr0)"; }
+function echo_debug() { if [ "$debug" = true ]; then command echo -e "$(tput setaf 3; tput bold)>>> $*$(tput sgr0)"; fi }
+# directories!
+function pushd() { command pushd "$@" > /dev/null; }
+function popd() { command popd "$@" > /dev/null; }
+# curl
+function curl() { command curl -fsSL "$1" -o "$2"; }
+
+# app logic
+function usage() {
+
+    cat <<EOF
+    #################
+    Simple Dotfiles installer
+    #################
+    Based on https://github.com/leonjza/dotfiles. Shouts to @leonjza
+    
+    Usage: install [option] [configs]
+
+    Examples:
+        install --install all
+        install --install vim
+        install --remove all
+        install --remove vim
+        install --update all
+        install --check all
+
+    Options:
+        -i, --install [configs]     Install configurations (See Valid Configs)
+        -r, --remove [configs]      Uninstall configurations (See Valid Configs)
+        -u, --update all            Update the configuration repository
+
+    Valid Configs:
+        ${configurations[@]}
+EOF
+
+}
+
+
+
+
+function prepare_git() {
+
+# Perparing git:
+# 1. Check if there is already a file named same as the gitpath - exit if this is the case
+# 2.     
+
+    echo_debug "[*] Preparing git folder at: $gitpath"
+
+    # if there is already a file called .dotfiles, error out for manual inspection
+    if [[ -f $gitpath ]]; then
+
+        echo_red "[!] $gitpath appears to be an existing file. Inspect/remove it first!"
+        exit 1
+
+    fi
+
+    # Check if the the gitpath already exists, if so do some checks to make sure its 
+    # inline with the repo
+    if [[ -d $gitpath ]]; then
+        # some more work is needed to to see if the repo is sane
+        echo_yellow "[-] $gitpath exists, inspecting it."
+        pushd $gitpath
+
+        # check if we are inside a valid git repository
+        valid_repo=$(set +e; git rev-parse --is-inside-work-tree 2>/dev/null; set -e)
+        if [[ ! "$valid_repo" = true ]]; then
+
+            echo_red "[!] $gitpath is a directory, but not a valid git repository. Move/delete it to continue."
+            exit 1
+
+        fi
+
+        # get the remote origin of the existing repository and check it
+        localorigin=$(git config --get remote.origin.url)
+        echo_debug "[-] Local git origin is: $localorigin"
+
+        if [[ ! "$localorigin" = $gitorigin ]]; then
+
+            echo_red "[!] It looks like the origin for the local dotfiles repo does not match."
+            echo_red "[!] The local origin is $localorigin and it should be $gitorigin"
+            exit 2
+
+        fi
+
+        popd
+
+        echo_green "[+] Git repository at $gitpath looks OK"
+    fi
+
+    
+
+
+    # if the path does not exist, just clone there. easy.
+    if [[ ! -d $gitpath ]]; then
+
+        echo_yellow "[-] Git repo in $gitpath does not exist. Cloning dotfiles repository: $gitorigin"
+        git clone $gitorigin $gitpath
+
+        echo_green "[+] Finished preparing git folder at: $gitpath"
+
+        return
+
+    fi
+
+
+}
+
+function validate_configuration() {
+
+    local config=$1
+    echo_debug "[*] Looking for '$config' in the valid configurations.."
+    for element in "${configurations[@]}"; do
+
+        if [[ "$element" == "$config" ]]; then
+            echo "[-] Configuration '$config' looks OK"
+            return
+        fi
+
+    done
+
+    echo_red "[!] $config is not a valid configuration"
+    exit 1
+
+}
+
+function backup_config() {
+
+    local config=$1
+
+    # add a date to the config file
+    local filename=$(basename $config-$(date +"%s"))
+
+    # make sure the backup dir exists
+    mkdir -p $rc_backup_dir
+
+    # copy the config file to the backup dir
+    echo_green "[+] Backing up config file $config"
+    echo_debug "[-] Config backup goes to $rc_backup_dir/$filename"
+    cp -f $config $rc_backup_dir/$filename
+
+}
+
+
+function install_zsh() {
+
+    local temp="$(mktemp)"
+    echo_green "Installing ZSH configuration"
+
+    # make sure zsh is available
+    if ! hash zsh 2>/dev/null; then
+        echo_red "zsh is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    # Ensure that *.d directory exists
+    echo_debug "Creating *.d directory in $HOME/.dotfiles.d/zshrc.d"
+    mkdir -p $HOME/.dotfiles.d/zshrc.d
+
+    echo "Downloading oh-my-zsh installer"
+    echo_debug "Saving installer to $temp"
+    curl "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" $temp
+
+    echo_debug "Preventing the installer from starting ZSH when its done"
+    sed -i -r "s/env zsh//" $temp
+
+    echo "Running oh-my-zsh installer..."
+    echo_debug "Using sh to run $temp"
+    sh $temp
+    echo_debug "Removing downloaded installer"
+    rm -f $temp
+
+    echo "Installing plugins"
+    echo_debug "Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
+
+# Syntax highlighting
+    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
+        git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
+    else
+        echo_yellow "Syntax highligthing plugin already exists."
+    fi
+
+    # Auto suggestions
+    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-autosuggestions" ]]; then
+        git clone git://github.com/zsh-users/zsh-autosuggestions $oh_my_zsh/custom/plugins/zsh-autosuggestions
+    else
+        echo_yellow "Autosuggestions plugin already exists."
+    fi
+    echo_debug "Symlinking .zshrc $gitpath/rc/zshrc to $zsh_rc"
+    ln -sf $gitpath/rc/zshrc $zsh_rc
+
+    echo "Symlinking *.zsh files to $HOME/.dotfiles.d/zshrc.d/"
+    ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d
+
+
+    echo "Configuring custom zsh theme"
+    echo "Creating Directories $oh_my_zsh/custom/themes"
+
+    # Ensure that custom theme  directory exist
+    echo "Creating custom theme directory in $oh_my_zsh/custom/themes/"
+    mkdir -p $oh_my_zsh/custom/themes/
+
+    echo "Symlinking zsh-theme file to $oh_my_zsh/custom/themes"
+    ln -sf $gitpath/config/oh-my-zsh/custom/themes/* $oh_my_zsh/custom/themes/
+
+    echo_green "ZSH config install complete!"
+
+}
+
+
+function config_vim() {
+
+    echo_green "Configuring Vim."
+
+    # make sure vim is available
+    if ! hash vim 2>/dev/null; then
+        echo_red "vim is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    # Ensure that *.d directory exists
+    echo_debug "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
+    mkdir -p $HOME/.dotfiles.d/vimrc.d
+
+    echo_debug "Preparing the vim plugin directory at $vim_plugin_dir"
+    mkdir -p $vim_plugin_dir
+
+    echo "Installing Vim Plugins"
+
+    # Vundle
+    if [[ ! -d "$vim_plugin_dir/bundle/Vundle.vim" ]]; then
+        git clone https://github.com/gmarik/Vundle.vim $vim_plugin_dir/bundle/Vundle.vim
+    else
+        echo_yellow "Vundle already exists."
+    fi
+
+    echo "Installing Vim configuration file"
+
+    echo_debug "Symlinking $gitpath/rc/vimrc to $vim_rc"
+    ln -sf $gitpath/rc/vimrc $vim_rc
+
+    echo "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
+    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
+
+    echo "Running vim plugin installer"
+    vim +PluginInstall +qall
+
+    echo_green "Vim config install complete!"
+
+}
+
+function config_xresources() {
+
+    echo_green "Configuring Xresources."
+    
+    echo "Symlinking Xresources to $HOME/.Xresources"
+    ln -sf $gitpath/rc/Xresources $HOME/.Xresources
+
+    echo_green "Xresources configuration complete!"
+}
+
+function config_i3() {
+
+    echo_green "Configuring i3."
+    
+     if ! hash i3 2>/dev/null; then
+        echo_red "i3 is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+    
+     # Ensure that i3 directory exist
+    echo "Creating i3 directory in $HOME/.config"
+    mkdir -p $HOME/.config/i3/scripts/
+    
+    echo "Symlinking i3 config files to $HOME/.config/i3/"
+    ln -sf $gitpath/config/i3/config $HOME/.config/i3
+    ln -sf $gitpath/config/i3/*.conf $HOME/.config/i3
+
+    echo "Symlinking i3 script files to $HOME/.config/i3/scripts"
+    ln -sf $gitpath/config/i3/scripts/* $HOME/.config/i3/scripts
+
+    echo_green "i3 configuration complete!"
+}
+
+function config_rofi() {
+
+    echo_green "Configuring i3."
+    
+      if ! hash rofi 2>/dev/null; then
+        echo_red "rofi is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+    
+     # Ensure that rofi directory exist
+    echo "Creating rofi directory in $HOME/.config"
+    mkdir -p $HOME/.config/rofi
+    
+    echo "Symlinking rofi config file to $HOME/.config/rofi/"
+    ln -sf $gitpath/config/rofi/config $HOME/.config/rofi
+
+    echo_green "rofi configuration complete!"
+}
+
+case $1 in
+zsh)
+install_zsh
+;;
+vim)
+config_vim
+;;
+xresources)
+config_xresources
+;;
+i3)
+config_i3
+;;
+rofi)
+config_rofi
+;;
+*)
+usage
+;;
+esac
