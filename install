@@ -139,7 +139,7 @@ function prepare_git() {
 
         update_repo
 
-        return
+        # return
     fi
 
 
