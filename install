@@ -19,7 +19,7 @@ set -e
 # static variables
 gitpath="$HOME/.dotfiles"
 gitorigin="https://github.com/CryDeTaan/dotfiles.git"
-debug=true
+debug=false
 
 # configurations this script knows how to setup
 declare -a configurations=("all" "none" "zsh" "vim")
@@ -409,6 +409,23 @@ function config_vim() {
 
     echo_green "Vim config install complete!"
 
+}
+
+function update_repo() {
+
+    prepare_git
+
+    echo_debug "Running git pull on $gitpath"
+    pushd $gitpath
+    git pull
+    popd
+
+    echo "Updating symlinks"
+
+    if [[ -d "$HOME/.dotfiles.d/zshrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d; fi
+    if [[ -d "$HOME/.dotfiles.d/vimrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d; fi
+
+    echo_green "Update complete. You may want to close/re-open your session for changes to take effect."
 }
 
 # start by checking the software needed by this installer
