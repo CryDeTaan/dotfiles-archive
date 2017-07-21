@@ -137,9 +137,9 @@ function prepare_git() {
 
         echo_green "[+] Git repository at $gitpath looks OK"
 
-        update_repo()
+        update_repo
 
-        # return
+        return
     fi
 
 
