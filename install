@@ -19,6 +19,7 @@ set -e
 # static variables
 gitpath="$HOME/.dotfiles"
 gitorigin="https://github.com/CryDeTaan/dotfiles.git"
+gitoriginSSH="git@github.com:CryDeTaan/dotfiles.git"
 debug=false
 
 # configurations this script knows how to setup
@@ -39,10 +40,11 @@ rc_backup_dir="$HOME/.dotfiles.d/backups"
 
 # helper functions
 # colors!
-function echo() { command echo -e " * $*"; }
-function echo_green() { command echo -e "$(tput setaf 2; tput bold)$*$(tput sgr0)"; }
-function echo_red() { command echo -e "$(tput setaf 1)$*$(tput sgr0)"; }
-function echo_yellow() { command echo -e "$(tput setaf 3)$*$(tput sgr0)"; }
+function echo_blank() { command echo -e ""; } # Blank line
+function echo() { command echo -e " [-] $*"; } # General Information is given - I like a lot of feedback
+function echo_green() { command echo -e " [+] $(tput setaf 2; tput bold)$*$(tput sgr0)"; } # When a task finishes successfully
+function echo_red() { command echo -e " [!] $(tput setaf 1)$*$(tput sgr0)"; } # When a task fails
+function echo_yellow() { command echo -e " [*] $(tput setaf 3)$*$(tput sgr0)"; } # When a task is about to run.
 function echo_debug() { if [ "$debug" = true ]; then command echo -e "$(tput setaf 3; tput bold)>>> $*$(tput sgr0)"; fi }
 # directories!
 function pushd() { command pushd "$@" > /dev/null; }
@@ -82,6 +84,38 @@ EOF
 
 
 
+function install_components() {
+
+    # check that the install target is something we know if
+    validate_configuration $install_target
+
+    # Ensure that we have the source repository ready in $gitpath
+    prepare_git
+    echo_debug "Installing: $install_target"
+
+    case $install_target in
+        none)
+            echo_yellow "Installing nothing..."
+            return
+        ;;
+        all)
+            install_zsh
+            install_vim
+        ;;
+        zsh)
+            install_zsh
+        ;;
+        vim)
+            install_vim
+        ;;
+    esac
+
+}
+
+
+
+
+
 
 function prepare_git() {
 
@@ -93,62 +127,73 @@ function prepare_git() {
 #           its has the same remote origin and perform update_repo.
 # 3. Lastly if the path does not exist, perform a git clone of the repository to gitpath. 
 
-    echo_debug "[*] Preparing git folder at: $gitpath"
+    echo_yellow "Preparing git folder at: $gitpath"
+    echo_blank
 
     # if there is already a file called .dotfiles, error out for manual inspection
     if [[ -f $gitpath ]]; then
 
-        echo_red "[!] $gitpath appears to be an existing file. Inspect/remove it first!"
+        echo_red "$gitpath appears to be an existing file. Inspect/remove it first, then rerun the installer to continue"
         exit 1
 
     fi
 
     # Check if the the gitpath already exists, if so do some checks to make sure its 
-    # inline with the repo
+    # in line with the repo
     if [[ -d $gitpath ]]; then
         # some more work is needed to to see if the repo is sane
-        echo_yellow "[-] $gitpath exists, inspecting it."
+        echo_yellow "$gitpath is a existing directory, inspecting it."
+        echo_blank
         pushd $gitpath
 
         # check if we are inside a valid git repository
         valid_repo=$(set +e; git rev-parse --is-inside-work-tree 2>/dev/null; set -e)
         if [[ ! "$valid_repo" = true ]]; then
 
-            echo_red "[!] $gitpath is a directory, but not a valid git repository. Move/delete it to continue."
+            echo_red "$gitpath is a directory, but not a valid git repository." 
+            echo_red "Move/delete it first, then rerun the install to continue."
             exit 1
 
         fi
 
-        echo_yellow "[-] $gitpath is a git repository, inspecting it."
+        echo_green "$gitpath is a existing git repository,"
+        echo_blank
+        echo_yellow "Inspecting it.."
+        echo_blank
 
         # get the remote origin of the existing repository and check it
         localorigin=$(git config --get remote.origin.url)
-        echo_debug "[-] Local git origin is: $localorigin"
+        echo "Local git origin is: $localorigin"
 
-        if [[ ! "$localorigin" = $gitorigin ]]; then
+        if [[ ! "$localorigin" = $gitorigin|$gitoriginSSH ]]; 
 
-            echo_red "[!] It looks like the origin for the local dotfiles repo does not match."
-            echo_red "[!] The local origin is $localorigin and it should be $gitorigin"
-            exit 2
+            then
+                echo_red "It looks like the origin for the local dotfiles repo does not match."
+                echo_red "The local origin is $localorigin and it should be $gitorigin"
+                exit 2
+
+            elif [ "$localorigin" = $gitorigin|$gitoriginSSH ]
+            
+                then
+                echo_red "The local origin $localorigin matches the $gitorigin"
+                echo_red "The script will now exit, run the updater to update the config"
+                exit 2
 
         fi
 
         popd
-
-        echo_green "[+] Git repository at $gitpath looks OK"
-
-        update_repo
 
         return
         
     fi
 
 
-    # if the path does not exist, just clone there. easy.
+    # if the path does not exist, just clone it. there, easy.
     if [[ ! -d $gitpath ]]; then
 
-        echo_yellow "[-] Git repo in $gitpath does not exist. Cloning dotfiles repository: $gitorigin"
+        echo_yellow "Git repo in $gitpath does not exist. Cloning dotfiles repository: $gitorigin"
         git clone $gitorigin $gitpath
+        echo_green "Done."
 
         echo_green "[+] Finished preparing git folder at: $gitpath"
 
@@ -164,11 +209,11 @@ function validate_configuration() {
     # This check the user provided arguments
 
     local config=$1
-    echo_debug "[*] Looking for '$config' in the valid configurations.."
+    echo_debug "Looking for '$config' in the valid configurations.."
     for element in "${configurations[@]}"; do
 
         if [[ "$element" == "$config" ]]; then
-            echo "[-] Configuration '$config' looks OK"
+            echo "Configuration '$config' looks OK"
             return
         fi
 
@@ -217,70 +262,45 @@ function restore_config() {
 }
 
 
-function install_components() {
-
-    # check that the install target is something we know if
-    validate_configuration $install_target
-
-    # Ensure that we have the source repository ready in $gitpath
-    prepare_git
-    echo_debug "Installing: $install_target"
-
-    case $install_target in
-        none)
-            echo_yellow "Installing nothing..."
-            return
-        ;;
-        all)
-            install_zsh
-            install_vim
-        ;;
-        zsh)
-            install_zsh
-        ;;
-        vim)
-            install_vim
-        ;;
-    esac
-
-}
-
 function install_zsh() {
 
     local temp="$(mktemp)"
-    echo_green "[+] Installing ZSH configuration"
+    echo_yellow "Installing ZSH configuration"
 
     # make sure zsh is available
     if ! hash zsh 2>/dev/null; then
-        echo_red "[!} zsh is not installed or in your PATH. Not installing this configuration."
+        echo_red "zsh is not installed or in your PATH. Not installing this configuration."
         return
     fi
 
     # Ensure that *.d directory exists
-    echo_debug "[-] Creating *.d directory in $HOME/.dotfiles.d/zshrc.d"
+    echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/zshrc.d"
     mkdir -p $HOME/.dotfiles.d/zshrc.d
+    echo_green "Done."
 
-    echo "[+] Downloading oh-my-zsh installer"
-    echo_debug "[-] Saving installer to $temp"
+
+    echo_yellow "Downloading oh-my-zsh installer, and"
+    echo_yellow "Saving installer to $temp"
     curl "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" $temp
+    echo_green "Done."
 
-    echo_debug "[-] Preventing the installer from starting ZSH when its done"
+    echo "Preventing the installer from starting ZSH when its done"
     sed -i -r "s/env zsh//" $temp
 
-    echo "[+] Running oh-my-zsh installer..."
-    echo_debug "[-] Using sh to run $temp"
+    echo "Running oh-my-zsh installer..."
+    echo "Using sh to run $temp"
     sh $temp
-    echo_debug "[-] Removing downloaded installer"
+    echo "Removing downloaded installer"
     rm -f $temp
 
-    echo "[-] Installing plugins"
-    echo_debug "[-] Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
+    echo "Installing plugins"
+    echo "Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
 
     # Syntax highlighting
     if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
         git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
     else
-        echo_yellow "[!] Syntax highligthing plugin already exists."
+        echo_red "Syntax highligthing plugin already exists, moving on."
     fi
 
     # Auto suggestions
@@ -428,6 +448,8 @@ function update_repo() {
 
     echo_green "Update complete. You may want to close/re-open your session for changes to take effect."
 }
+
+
 
 # start by checking the software needed by this installer
 # if we cant find it, rather die
