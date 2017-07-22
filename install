@@ -165,14 +165,14 @@ function prepare_git() {
         localorigin=$(git config --get remote.origin.url)
         echo "Local git origin is: $localorigin"
 
-        if [[ ! "$localorigin" = $gitorigin|$gitoriginSSH ]]; 
+        if [[ ! "$localorigin" = $gitorigin ]]; 
 
             then
                 echo_red "It looks like the origin for the local dotfiles repo does not match."
                 echo_red "The local origin is $localorigin and it should be $gitorigin"
                 exit 2
 
-            elif [ "$localorigin" = $gitorigin|$gitoriginSSH ]
+            elif [ "$localorigin" = $gitorigin ]
             
                 then
                 echo_red "The local origin $localorigin matches the $gitorigin"
