@@ -40,15 +40,6 @@ rc_backup_dir="$HOME/.dotfiles.d/backups"
 
 # helper functions
 # colors!
-
-function echo_func_start() { command echo -e "$(tput setaf 4; tput bold; tput smul)$* $(tput sgr0)"} # Function Start Heading.
-
-
-
-
-
-
-
 function echo_blank() { command echo -e ""; } # Blank line
 function echo() { command echo -e " [-] $*"; } # General Information is given - I like a lot of feedback
 function echo_green() { command echo -e " [+] $(tput setaf 2; tput bold)$*$(tput sgr0)"; } # When a task finishes successfully
@@ -272,8 +263,6 @@ function restore_config() {
 
 
 function install_zsh() {
-
-    echo_func_start "Installing zsh"
 
     local temp="$(mktemp)"
     echo_yellow "Installing ZSH configuration"
