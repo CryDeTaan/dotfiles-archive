@@ -40,7 +40,17 @@ rc_backup_dir="$HOME/.dotfiles.d/backups"
 
 # helper functions
 # colors!
-function echo_func_start() { command echo -e "$(tput setaf 4; tput bold; tput smul)$* $(tput sgr0)"} # Function Start Heading.
+
+function echo_func_start() { command echo -e "$(tput setaf 4; tput bold; tput smul)$* $(tput sgr0)";} # Function Start Heading.
+
+
+
+
+
+
+
+
+
 
 function echo_blank() { command echo -e ""; } # Blank line
 function echo() { command echo -e " [-] $*"; } # General Information is given - I like a lot of feedback
@@ -265,6 +275,8 @@ function restore_config() {
 
 
 function install_zsh() {
+
+    echo_func_start "Installing zsh"
 
     local temp="$(mktemp)"
     echo_yellow "Installing ZSH configuration"
@@ -502,7 +514,7 @@ fi
 
 # install
 if [[ ! "$install_target" = false ]]; then
-    echo_func_start "Running install on: $install_target"
+    echo "Running install on: $install_target"
     install_components
 fi
 
