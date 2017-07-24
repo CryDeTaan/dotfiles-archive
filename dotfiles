@@ -495,7 +495,6 @@ function update_helper() {
         echo_handover "Back to the script"
     fi
 
-
 }
 
 function restore_config() {
