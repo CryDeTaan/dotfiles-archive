@@ -407,12 +407,16 @@ function install_zsh() {
     echo_blank
 
     echo_green_func "ZSH installation complete!"
+    echo_blank
 
 }
 
 function install_vim() {
 
-    echo_green "Installing Vim configuration"
+    echo_func_start "Installing Vim configuration"
+
+
+    echo_sub "Preparing for VIM installation"
 
     # make sure vim is available
     if ! hash vim 2>/dev/null; then
@@ -421,89 +425,71 @@ function install_vim() {
     fi
 
     # Ensure that *.d directory exists
-    echo_debug "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
+    echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
     mkdir -p $HOME/.dotfiles.d/vimrc.d
 
-    echo_debug "Preparing the vim plugin directory at $vim_plugin_dir"
+    echo_green "Done"
+    echo_blank
+
+    echo_sub "Installing Vim Plugins"
+
+    echo_yellow "Preparing the vim plugin directory at $vim_plugin_dir"
     mkdir -p $vim_plugin_dir
 
-    echo "Installing Vim Plugins"
+    echo "Adding Vim Plugins"
 
     # Vundle
     if [[ ! -d "$vim_plugin_dir/bundle/Vundle.vim" ]]; then
+
+        echo_blank
+        echo_handover "Over to git"
+        echo_blank
+
+
         git clone https://github.com/gmarik/Vundle.vim $vim_plugin_dir/bundle/Vundle.vim
+
+        echo_blank
+        echo_handover "Back to the script"
+        echo_blank
+
     else
-        echo_yellow "Vundle already exists."
+        echo_red "Vundle already exists, moving one."
     fi
 
-    # Molokai
-    if [[ ! -d "$vim_plugin_dir/bundle/molokai" ]]; then
-        git clone https://github.com/tomasr/molokai $vim_plugin_dir/bundle/molokai
-    else
-        echo_yellow "Molokai color scheme already exists."
-    fi
+    echo_green "Done"
+    echo_blank
 
-    echo "Installing Vim configuration file"
+    echo_func_start "Adding my VIM configuration"
 
     ## Backup the current one
     if [[ -f "$vim_rc" ]]; then
         backup_config $vim_rc
     fi
 
-    echo_debug "Symlinking $gitpath/rc/vimrc to $vim_rc"
-    ln -sf $gitpath/rc/vimrc $vim_rc
-
-    echo "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
-    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
-
-    echo "Running vim plugin installer"
-    vim +PluginInstall +qall
-
-    echo_green "Vim config install complete!"
-
-}
-
-
-function config_vim() {
-
-    echo_green "Configuring Vim."
-
-    # make sure vim is available
-    if ! hash vim 2>/dev/null; then
-        echo_red "vim is not installed or in your PATH. Not installing this configuration."
-        return
-    fi
-
-    # Ensure that *.d directory exists
-    echo_debug "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
-    mkdir -p $HOME/.dotfiles.d/vimrc.d
-
-    echo_debug "Preparing the vim plugin directory at $vim_plugin_dir"
-    mkdir -p $vim_plugin_dir
-
-    echo "Installing Vim Plugins"
-
-    # Vundle
-    if [[ ! -d "$vim_plugin_dir/bundle/Vundle.vim" ]]; then
-        git clone https://github.com/gmarik/Vundle.vim $vim_plugin_dir/bundle/Vundle.vim
-    else
-        echo_yellow "Vundle already exists."
-    fi
-
-    echo "Installing Vim configuration file"
+    echo_sub "Creating symlinks"
 
     echo_debug "Symlinking $gitpath/rc/vimrc to $vim_rc"
     ln -sf $gitpath/rc/vimrc $vim_rc
 
-    echo "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
+    echo_yellow "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
     ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
 
-    echo "Running vim plugin installer"
+    echo_green "Done"
+    echo_blank
+
+    echo_func_start "Installing vim plugin"
+
+    echo_yellow "Running vim plugin installer"
     vim +PluginInstall +qall
 
-    echo_green "Vim config install complete!"
+    echo_green "Done"
+    echo_blank
+
+    echo_green_func "Vim installation complete!"
+    echo_blank
 
 }
+
 
 function update_repo() {
 
