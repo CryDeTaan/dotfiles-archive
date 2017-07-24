@@ -8,10 +8,10 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
-
 Plugin 'tpope/vim-vinegar'
 
 Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 
 Plugin 'ctrlpvim/ctrlp.vim'
 

@@ -33,9 +33,6 @@ nmap <Leader><space> :nohlsearch<cr>
 " Source .vimrc
 nmap <Leader>sv :so ~/.dotfiles/rc/vimrc<cr>
 
-" Open NERDTreeToggle
-nmap <Leader>t :NERDTreeToggle<cr>
- 
 " Open most reciently used files by Vim
 nmap <C-e> :CtrlPMRUFiles<cr>
 
