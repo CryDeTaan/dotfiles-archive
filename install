@@ -41,22 +41,22 @@ rc_backup_dir="$HOME/.dotfiles.d/backups"
 # helper functions
 # colors!
 
-function echo_func_start() { command echo -e "$(tput setaf 6; tput bold; tput smul)$* $(tput sgr0)";} # Function Start Heading.
-function echo_start() { command echo -e "$(tput setaf 4; tput bold; tput smul)$* $(tput sgr0)";} # Start Script
-function echo_sub() { command echo -e "$(tput setaf 4;)$* $(tput sgr0)";} # Start Script
-
-function echo_handover() { command echo -e "$(tput setaf 5;)#### $* ####    $(tput sgr0)";} # Start Script
-
 function echo_blank() { command echo -e ""; } # Blank line
-function echo() { command echo -e " [-] $*"; } # General Information is given - I like a lot of feedback
-function echo_green() { command echo -e " [+] $(tput setaf 2;)$*$(tput sgr0)"; } # When a task finishes successfully
-function echo_green_func() { command echo -e "$(tput setaf 2; tput bold)$*$(tput sgr0)"; } # When a task finishes successfully
+function echo_start() { command echo -e "$(tput setaf 4; tput bold; tput smul)$* $(tput sgr0) \n";} # Start Script
+function echo_func_start() { command echo -e "$(tput setaf 6; tput bold; tput smul)$* $(tput sgr0) \n";} # Function Start Heading.
+function echo_subfunc_start() { command echo -e "$(tput setaf 4;)$* $(tput sgr0) \n";} # Start Script
+function echo_handover() { command echo -e "\n$(tput setaf 5;)#### $* ####$(tput sgr0)\n";} # Start Script
+function echo_func_done() { command echo -e "$(tput setaf 2; tput bold)$*$(tput sgr0)\n"; } # When a task finishes successfully
+function echo_subfunc_done() { command echo -e " [+] $(tput setaf 2;)$*$(tput sgr0)\n"; } # When a task finishes successfully
+function echo_yellow() { command echo -e " [*] $(tput setaf 3)$*$(tput sgr0)"; } # Taks feedback.
 function echo_red() { command echo -e " [!] $(tput setaf 1)$*$(tput sgr0)"; } # When a task fails
-function echo_yellow() { command echo -e " [*] $(tput setaf 3)$*$(tput sgr0)"; } # When a task is about to run.
+function echo() { command echo -e "$*"; } # General Information is given - I like a lot of feedback
 function echo_debug() { if [ "$debug" = true ]; then command echo -e "$(tput setaf 3; tput bold)>>> $*$(tput sgr0)"; fi }
+
 # directories!
 function pushd() { command pushd "$@" > /dev/null; }
 function popd() { command popd "$@" > /dev/null; }
+
 # curl
 function curl() { command curl -fsSL "$1" -o "$2"; }
 
@@ -64,20 +64,24 @@ function curl() { command curl -fsSL "$1" -o "$2"; }
 function usage() {
 
     cat <<EOF
-    #################
-    Simple Dotfiles installer
-    #################
-    Based on https://github.com/leonjza/dotfiles. Shouts to @leonjza
+                                          
+ ____        _    ___  _  _           
+|    \  ___ | |_ |  _||_|| | ___  ___ 
+|  |  || . ||  _||  _|| || || -_||_ -|
+|____/ |___||_|  |_|  |_||_||___||___|
+                                                                                                                       
+
+    Inspired by https://github.com/leonjza/dotfiles. Shouts to @leonjza
     
-    Usage: install [option] [configs]
+    Usage: dotfiles [option] [configs]
 
     Examples:
-        install --install all
-        install --install vim
-        install --remove all
-        install --remove vim
-        install --update all
-        install --check all
+        dotfiles --install all
+        dotfiles --install vim
+        dotfiles --remove all
+        dotfiles --remove vim
+        dotfiles --update all
+        dotfiles --check all
 
     Options:
         -i, --install [configs]     Install configurations (See Valid Configs)
@@ -86,6 +90,7 @@ function usage() {
 
     Valid Configs:
         ${configurations[@]}
+
 EOF
 
 }
@@ -121,8 +126,26 @@ function install_components() {
 }
 
 
+function validate_configuration() {
 
+    # This check the user provided arguments
 
+    local config=$1
+
+    echo_debug "Looking for '$config' in the valid configurations.."
+    for element in "${configurations[@]}"; do
+
+        if [[ "$element" == "$config" ]]; then
+            echo_debug "Configuration '$config' looks OK"
+            return
+        fi
+
+    done
+
+    echo_red "[!] $config is not a valid configuration"
+    exit 1
+
+}
 
 
 function prepare_git() {
@@ -163,12 +186,12 @@ function prepare_git() {
 
         fi
 
-        echo_green "$gitpath is a existing git repository,"
+        echo_yellow "$gitpath is a existing git repository,"
         echo_yellow "Inspecting it.."
 
         # get the remote origin of the existing repository and check it
         localorigin=$(git config --get remote.origin.url)
-        echo "Local git origin is: $localorigin"
+        echo_yellow "Local git origin is: $localorigin"
 
         if [[ ! "$localorigin" = $gitorigin ]]; 
 
@@ -177,18 +200,12 @@ function prepare_git() {
                 echo_red "The local origin is $localorigin and it should be $gitorigin"
                 exit 2
 
-            elif [ "$localorigin" = $gitorigin ]
-            
-                then
-                echo_red "The local origin $localorigin matches the $gitorigin"
-                echo_red "The script will now exit, run the updater to update the config"
-                exit 2
-
         fi
 
         popd
 
-        return
+        echo_subfunc_done "Done"
+
         
     fi
 
@@ -197,49 +214,24 @@ function prepare_git() {
     if [[ ! -d $gitpath ]]; then
 
         echo_yellow "Git repo in $gitpath does not exist. Cloning dotfiles repository: $gitorigin"
-
-        echo_blank
         
         echo_handover "Over to git"
 
-        echo_blank
         git clone $gitorigin $gitpath
-        echo_blank
 
         echo_handover "Back to script"
-        echo_blank
 
-        echo_green "Done"
-        echo_blank
-
+        echo_subfunc_done "Done"
+        
         return
 
     fi
 
-    
+    echo_func_done "Git prepared successfully."
 
 
 }
 
-function validate_configuration() {
-
-    # This check the user provided arguments
-
-    local config=$1
-    echo_debug "Looking for '$config' in the valid configurations.."
-    for element in "${configurations[@]}"; do
-
-        if [[ "$element" == "$config" ]]; then
-            echo_debug "Configuration '$config' looks OK"
-            return
-        fi
-
-    done
-
-    echo_red "[!] $config is not a valid configuration"
-    exit 1
-
-}
 
 function backup_config() {
 
@@ -259,6 +251,253 @@ function backup_config() {
 }
 
 
+function install_zsh() {
+
+    echo_func_start "Installing ZSH"
+
+    echo_subfunc_start "Preparing for ZSH installation"
+
+    local temp="$(mktemp)"
+    
+
+    # make sure zsh is available
+    if ! hash zsh 2>/dev/null; then
+        echo_red "zsh is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    # Ensure that *.d directory exists
+    echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/zshrc.d"
+    mkdir -p $HOME/.dotfiles.d/zshrc.d
+    echo_subfunc_done "Done"
+
+    echo_subfunc_start "Starting oh-my-zsh installation"
+    echo_yellow "Downloading oh-my-zsh installer, and"
+    echo_yellow "Saving installer to $temp"
+    curl "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" $temp
+
+    echo_yellow "Preventing the installer from starting ZSH when its done"
+    sed -i -r "s/env zsh//" $temp
+
+    echo_yellow "Running oh-my-zsh installer..."
+    echo_yellow "Using sh to run $temp"
+
+    echo_handover "Over to the oh-my-zsh installer"
+
+    sh $temp
+
+    echo_handover "Back to the script"
+
+    echo_yellow "Removing downloaded installer"
+    rm -f $temp
+
+    echo_subfunc_done "done"
+
+    echo_subfunc_start "Installing oh-my-zsh plugins"
+
+    echo_yellow "Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
+
+    # Syntax highlighting
+    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
+
+        echo_handover "Over to git"
+
+        git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
+
+        echo_handover "Back to the script"
+
+    else
+        echo_red "Syntax highligthing plugin already exists, moving on."
+    fi
+
+    # Auto suggestions
+    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-autosuggestions" ]]; then
+
+        echo_handover "Over to git"
+
+        git clone git://github.com/zsh-users/zsh-autosuggestions $oh_my_zsh/custom/plugins/zsh-autosuggestions
+
+        echo_handover "Back to the script"
+        
+    else
+        echo_red "Autosuggestions plugin already exists, moving on."
+    fi
+
+    echo_subfunc_done "Done"
+
+    echo_func_start "Adding my ZSH configuration"
+
+    ## Backup the current one
+    if [[ -f "$zsh_rc" ]]; then
+        echo_subfunc_start "Backup current zshrc"
+        backup_config $zsh_rc
+        echo_subfunc_done "Done"
+    fi
+
+    
+    echo_subfunc_start "Creating symlinks"
+
+    echo_debug "Symlinking $gitpath/rc/zshrc to $zsh_rc"
+    ln -sf $gitpath/rc/zshrc $zsh_rc
+
+    echo_yellow "Symlinking *.zsh files to $HOME/.dotfiles.d/zshrc.d/"
+    ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d
+
+    echo_subfunc_done "Done"
+
+    echo_subfunc_start "Installing custom zsh theme"
+
+    if [[ ! -d "$$oh_my_zsh/custom/themes/" ]]; then
+        echo_yellow "Creating Directories $oh_my_zsh/custom/themes"
+        mkdir -p $oh_my_zsh/custom/themes/
+    fi
+
+    echo_yellow "Symlinking zsh-theme file to $oh_my_zsh/custom/themes"
+    ln -sf $gitpath/config/oh-my-zsh/custom/themes/crydetaan.zsh-theme $oh_my_zsh/custom/themes/crydetaan.zsh-theme
+
+    echo_subfunc_done "Done"
+
+    echo_func_done "ZSH installation complete!"
+
+}
+
+function install_vim() {
+
+    echo_func_start "Installing Vim configuration"
+
+    echo_subfunc_start "Preparing for VIM installation"
+
+    # make sure vim is available
+    if ! hash vim 2>/dev/null; then
+        echo_red "vim is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    # Ensure that *.d directory exists
+    echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
+    mkdir -p $HOME/.dotfiles.d/vimrc.d
+
+    echo_subfunc_done "Done"
+
+    echo_subfunc_start "Installing Vim Plugins"
+
+    echo_yellow "Preparing the vim plugin directory at $vim_plugin_dir"
+    mkdir -p $vim_plugin_dir
+
+    echo "Adding Vim Plugins"
+
+    # Vundle
+    if [[ ! -d "$vim_plugin_dir/bundle/Vundle.vim" ]]; then
+
+        echo_handover "Over to git"
+
+        git clone https://github.com/gmarik/Vundle.vim $vim_plugin_dir/bundle/Vundle.vim
+
+        echo_handover "Back to the script"
+
+    else
+        echo_red "Vundle already exists, moving one."
+    fi
+    echo_subfunc_done "Done"
+
+    echo_func_start "Adding my VIM configuration"
+
+    ## Backup the current one
+    if [[ -f "$vim_rc" ]]; then
+        backup_config $vim_rc
+    fi
+
+    echo_subfunc_start "Creating symlinks"
+
+    echo_debug "Symlinking $gitpath/rc/vimrc to $vim_rc"
+    ln -sf $gitpath/rc/vimrc $vim_rc
+
+    echo_yellow "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
+    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
+
+    echo_subfunc_done "Done"
+
+    echo_func_start "Installing vim plugin"
+
+    echo_yellow "Running vim plugin installer"
+    vim +PluginInstall +qall
+
+    echo_subfunc_done "Done"
+
+    echo_func_done "Vim installation complete!"
+
+}
+
+
+function update_repo() {
+
+    # Preparing git by running the prepare_git function
+    prepare_git
+
+    # Updating my dotfiles from git
+    echo_func_start "Updating Dotfiles"
+
+    # Running git pull
+    echo_subfunc_start "Running git pull on $gitpath"
+    echo_handover "Over to git"
+    
+    pushd $gitpath
+    git pull
+    popd
+
+    echo_handover "Back to script"
+    echo_subfunc_done "Done"
+
+    # Running symlinks again incase I added new files
+    echo_subfunc_start "Updating my configurations"
+    echo_yellow "Updating symlinks"
+
+    if [[ -d "$HOME/.dotfiles.d/zshrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d; fi
+    if [[ -d "$HOME/.dotfiles.d/vimrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d; fi
+
+    echo_subfunc_done "Done"
+
+    # Updating oh-my-zsh plugins. Using the update_helper function to do the git pull
+    echo_subfunc_start "Updating oh-my-zsh plugins"
+    echo_yellow "Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
+
+    update_helper $oh_my_zsh/custom/plugins/zsh-syntax-highlighting # Syntax highlighting
+    update_helper $oh_my_zsh/custom/plugins/zsh-autosuggestions # Auto suggestions
+
+    echo_subfunc_done "Done"
+
+    # Updating vim plugins. Using the update_helper function to do the git pull
+    echo_subfunc_start "Updating Vim plugins"
+    echo_yellow "Using vim directory: $vim_plugin_dir/bundle/"
+
+    update_helper $vim_plugin_dir/bundle/Vundle.vim
+
+    echo_yellow "Running vim plugin installer"
+    vim +PluginInstall +qall
+
+    echo_subfunc_done "Done"
+
+    echo_func_done "Update complete. You may want to close/re-open your session for changes to take effect."
+}
+
+function update_helper() {
+
+        if [[ -d "$*" ]]; then
+
+        echo_handover "Over to git"
+
+        pushd $*
+
+        git pull
+
+        popd
+
+        echo_handover "Back to the script"
+    fi
+
+
+}
+
 function restore_config() {
 
     local config=$1
@@ -276,236 +515,6 @@ function restore_config() {
     else
         echo_yellow "No backup of $config could be found. nothing to restore."
     fi
-}
-
-
-function install_zsh() {
-
-    echo_func_start "Installing ZSH"
-
-    echo_sub "Preparing for ZSH installation"
-
-    local temp="$(mktemp)"
-    
-
-    # make sure zsh is available
-    if ! hash zsh 2>/dev/null; then
-        echo_red "zsh is not installed or in your PATH. Not installing this configuration."
-        return
-    fi
-
-    # Ensure that *.d directory exists
-    echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/zshrc.d"
-    mkdir -p $HOME/.dotfiles.d/zshrc.d
-    echo_green "Done"
-    echo_blank
-
-    echo_sub "Starting oh-my-zsh installation"
-    echo_yellow "Downloading oh-my-zsh installer, and"
-    echo_yellow "Saving installer to $temp"
-    curl "https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh" $temp
-
-    echo_yellow "Preventing the installer from starting ZSH when its done"
-    sed -i -r "s/env zsh//" $temp
-
-    echo_yellow "Running oh-my-zsh installer..."
-    echo_yellow "Using sh to run $temp"
-
-    echo_blank
-    echo_handover "Over to the oh-my-zsh installer"
-    echo_blank
-
-    sh $temp
-
-    echo_blank
-    echo_handover "Back to the script"
-    echo_blank
-
-    echo_yellow "Removing downloaded installer"
-    rm -f $temp
-
-    echo_green "done"
-    echo_blank
-
-    echo_sub "Installing oh-my-zsh plugins"
-
-    echo_yellow "Using oh-my-zsh directory: $oh_my_zsh/custom/plugins"
-
-    # Syntax highlighting
-    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-syntax-highlighting" ]]; then
-
-        echo_blank
-        echo_handover "Over to git"
-        echo_blank
-
-        git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
-
-        echo_blank
-        echo_handover "Back to the script"
-        echo_blank
-
-    else
-        echo_red "Syntax highligthing plugin already exists, moving on."
-    fi
-
-    # Auto suggestions
-    if [[ ! -d "$oh_my_zsh/custom/plugins/zsh-autosuggestions" ]]; then
-
-        echo_blank
-        echo_handover "Over to git"
-        echo_blank
-
-
-        git clone git://github.com/zsh-users/zsh-autosuggestions $oh_my_zsh/custom/plugins/zsh-autosuggestions
-
-        echo_blank
-        echo_handover "Back to the script"
-        echo_blank
-        
-    else
-        echo_red "Autosuggestions plugin already exists, moving on."
-    fi
-
-    echo_green "Done"
-    echo_blank
-
-    echo_func_start "Adding my ZSH configuration"
-
-    ## Backup the current one
-    if [[ -f "$zsh_rc" ]]; then
-        echo_sub "Backup current zshrc"
-        backup_config $zsh_rc
-        echo_green "Done"
-        echo_blank
-    fi
-
-    
-
-    echo_sub "Creating symlinks"
-
-    echo_debug "Symlinking $gitpath/rc/zshrc to $zsh_rc"
-    ln -sf $gitpath/rc/zshrc $zsh_rc
-
-    echo_yellow "Symlinking *.zsh files to $HOME/.dotfiles.d/zshrc.d/"
-    ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d
-
-    echo_green "Done"
-
-    echo_blank
-
-    echo_sub "Installing custom zsh theme"
-
-    if [[ ! -d "$$oh_my_zsh/custom/themes/" ]]; then
-        echo_yellow "Creating Directories $oh_my_zsh/custom/themes"
-        mkdir -p $oh_my_zsh/custom/themes/
-    fi
-
-    echo_yellow "Symlinking zsh-theme file to $oh_my_zsh/custom/themes"
-    ln -sf $gitpath/config/oh-my-zsh/custom/themes/crydetaan.zsh-theme $oh_my_zsh/custom/themes/crydetaan.zsh-theme
-
-    echo_green "Done"
-    echo_blank
-
-    echo_green_func "ZSH installation complete!"
-    echo_blank
-
-}
-
-function install_vim() {
-
-    echo_func_start "Installing Vim configuration"
-
-
-    echo_sub "Preparing for VIM installation"
-
-    # make sure vim is available
-    if ! hash vim 2>/dev/null; then
-        echo_red "vim is not installed or in your PATH. Not installing this configuration."
-        return
-    fi
-
-    # Ensure that *.d directory exists
-    echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
-    mkdir -p $HOME/.dotfiles.d/vimrc.d
-
-    echo_green "Done"
-    echo_blank
-
-    echo_sub "Installing Vim Plugins"
-
-    echo_yellow "Preparing the vim plugin directory at $vim_plugin_dir"
-    mkdir -p $vim_plugin_dir
-
-    echo "Adding Vim Plugins"
-
-    # Vundle
-    if [[ ! -d "$vim_plugin_dir/bundle/Vundle.vim" ]]; then
-
-        echo_blank
-        echo_handover "Over to git"
-        echo_blank
-
-
-        git clone https://github.com/gmarik/Vundle.vim $vim_plugin_dir/bundle/Vundle.vim
-
-        echo_blank
-        echo_handover "Back to the script"
-        echo_blank
-
-    else
-        echo_red "Vundle already exists, moving one."
-    fi
-
-    echo_green "Done"
-    echo_blank
-
-    echo_func_start "Adding my VIM configuration"
-
-    ## Backup the current one
-    if [[ -f "$vim_rc" ]]; then
-        backup_config $vim_rc
-    fi
-
-    echo_sub "Creating symlinks"
-
-    echo_debug "Symlinking $gitpath/rc/vimrc to $vim_rc"
-    ln -sf $gitpath/rc/vimrc $vim_rc
-
-    echo_yellow "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
-    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
-
-    echo_green "Done"
-    echo_blank
-
-    echo_func_start "Installing vim plugin"
-
-    echo_yellow "Running vim plugin installer"
-    vim +PluginInstall +qall
-
-    echo_green "Done"
-    echo_blank
-
-    echo_green_func "Vim installation complete!"
-    echo_blank
-
-}
-
-
-function update_repo() {
-
-    prepare_git
-
-    echo_debug "Running git pull on $gitpath"
-    pushd $gitpath
-    git pull
-    popd
-
-    echo "Updating symlinks"
-
-    if [[ -d "$HOME/.dotfiles.d/zshrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/zshrc.d/* $HOME/.dotfiles.d/zshrc.d; fi
-    if [[ -d "$HOME/.dotfiles.d/vimrc.d/" ]]; then ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d; fi
-
-    echo_green "Update complete. You may want to close/re-open your session for changes to take effect."
 }
 
 
@@ -569,6 +578,6 @@ if [[ ! "$uninstall_target" = false ]]; then
 fi
 
 if [[ "$update" = true ]]; then
-    echo_start "Running repo update"
+    echo_start "Running dotfiles update"
     update_repo
 fi
