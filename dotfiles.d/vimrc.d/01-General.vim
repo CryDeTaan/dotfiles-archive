@@ -33,8 +33,6 @@ nmap <Leader><space> :nohlsearch<cr>
 " Source .vimrc
 nmap <Leader>sv :so ~/.dotfiles/rc/vimrc<cr>
 
-" Open most reciently used files by Vim
-nmap <C-e> :CtrlPMRUFiles<cr>
 
 " -------------Split Mappings------------- "
 
@@ -42,17 +40,7 @@ set splitbelow
 set splitright
 
 "nmap <C-
-
-
-
-" -------------Plugins------------- "
-
-"/
-"/ CtrlP
-"/
-
-let g:ctrlp_match_window = 'bottom,order:ttb,min:1,max:5,results:10'
-
+"Something is still missing here. Time will tell ;p
 
 
 

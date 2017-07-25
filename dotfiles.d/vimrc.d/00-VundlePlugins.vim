@@ -8,14 +8,14 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'tpope/vim-vinegar'
+" Plugin 'tpope/vim-vinegar' I am not sure that I will be using this.
 
-Plugin 'scrooloose/nerdtree'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'scrooloose/nerdtree' " Classic style directory structure view/pane on the left, access it using ctrl+t
+Plugin 'Xuyuanp/nerdtree-git-plugin' " This adds git status visuals to nerdtree 
 
-Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim' " Nice fuzzy search plugin, access it using ctrl+p
 
-Plugin 'airblade/vim-gitgutter'
+Plugin 'airblade/vim-gitgutter' " To the left of the numbers in Vim you will now get some gitvisuals on what has changed in the file
 
 " Once all of the Plugins have been added following is required
 call vundle#end()            " required
