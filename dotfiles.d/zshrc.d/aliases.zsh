@@ -11,3 +11,5 @@ alias i3conf="vim ~/.config/i3/config"
 alias i3blocks="vim ~/.config/i3blocks.conf"
 alias roficonf="vim ~/.config/rofi/config"
 alias termconf="vim .Xresources"
+
+alias dotfiles="bash <(curl -fsSL https://raw.githubusercontent.com/crydetaan/dotfiles/master/dotfiles)"
