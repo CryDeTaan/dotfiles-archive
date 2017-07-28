@@ -7,7 +7,7 @@
 # This script is structured in the following way:
 #
 #   Default variable values such as git path & commandline arguments
-#   Helper functions such as color output
+#   Helper functions such as colour output
 #   Function definitions with the *actual* logic
 #   Small helper to ensure the commands needed for this installer is available
 #   Commandline argument parser at the bottom to decide what gets called
@@ -39,7 +39,7 @@ vim_rc="$HOME/.vimrc"
 rc_backup_dir="$HOME/.dotfiles.d/backups"
 
 # helper functions
-# colors!
+# colours!
 
 function echo_blank() { command echo -e ""; } # Blank line
 function echo_start() { command echo -e "$(tput setaf 4; tput bold; tput smul)$* $(tput sgr0) \n";} # Start Script
@@ -48,7 +48,7 @@ function echo_subfunc_start() { command echo -e "$(tput setaf 4;)$* $(tput sgr0)
 function echo_handover() { command echo -e "\n$(tput setaf 5;)#### $* ####$(tput sgr0)\n";} # Start Script
 function echo_func_done() { command echo -e "$(tput setaf 2; tput bold)$*$(tput sgr0)\n"; } # When a task finishes successfully
 function echo_subfunc_done() { command echo -e " [+] $(tput setaf 2;)$*$(tput sgr0)\n"; } # When a task finishes successfully
-function echo_yellow() { command echo -e " [*] $(tput setaf 3)$*$(tput sgr0)"; } # Taks feedback.
+function echo_yellow() { command echo -e " [*] $(tput setaf 3)$*$(tput sgr0)"; } # Task feedback.
 function echo_red() { command echo -e " [!] $(tput setaf 1)$*$(tput sgr0)"; } # When a task fails
 function echo() { command echo -e "$*"; } # General Information is given - I like a lot of feedback
 function echo_debug() { if [ "$debug" = true ]; then command echo -e "$(tput setaf 3; tput bold)>>> $*$(tput sgr0)"; fi }
@@ -150,11 +150,11 @@ function validate_configuration() {
 
 function prepare_git() {
 
-# Perparing git:
+# Preparing git:
 # 1. Check if a file with the name of gitpath exists - exit if this is the case.
 # 2. Check if a directory with the name of gitpath exists - if so do the following check:
 #       i.  Exit if the directory is not a git repository.
-#       ii. If the direcotry is a git repository, check config to confirm
+#       ii. If the directory is a git repository, check config to confirm
 #           its has the same remote origin and perform update_repo.
 # 3. Lastly if the path does not exist, perform a git clone of the repository to gitpath.
 
@@ -169,7 +169,7 @@ function prepare_git() {
 
     fi
 
-    # Check if the the gitpath already exists, if so do some checks to make sure its 
+    # Check if the gitpath already exists, if so do some checks to make sure its 
     # in line with the repo
     if [[ -d $gitpath ]]; then
         # some more work is needed to to see if the repo is sane
@@ -210,7 +210,7 @@ function prepare_git() {
     fi
 
 
-    # if the path does not exist, just clone it. there, easy.
+    # if the path does not exist, just clone it. There, easy.
     if [[ ! -d $gitpath ]]; then
 
         echo_yellow "Git repo in $gitpath does not exist. Cloning dotfiles repository: $gitorigin"
@@ -307,7 +307,7 @@ function install_zsh() {
         echo_handover "Back to the script"
 
     else
-        echo_red "Syntax highligthing plugin already exists, moving on."
+        echo_red "Syntax highlighting plugin already exists, moving on."
     fi
 
     # Auto suggestions
@@ -448,7 +448,7 @@ function update_repo() {
     echo_handover "Back to script"
     echo_subfunc_done "Done"
 
-    # Running symlinks again incase I added new files
+    # Running symlinks again in case I added new files
     echo_subfunc_start "Updating my configurations"
     echo_yellow "Updating symlinks"
 
@@ -504,7 +504,7 @@ function restore_config() {
 
     # search for the latest backup in the backup directory
     filename=$(ls -a $rc_backup_dir | grep $base | sort -n -t _ -k 2 | tail -1)
-    echo_debug "Backupfile lookup returned: $filename"
+    echo_debug "Backup file lookup returned: $filename"
 
     if [[ ! "$filename" == "" ]]; then
 
@@ -512,7 +512,7 @@ function restore_config() {
         cp -f $rc_backup_dir/$filename $config
 
     else
-        echo_yellow "No backup of $config could be found. nothing to restore."
+        echo_yellow "No backup of $config could be found. Nothing to restore."
     fi
 }
 

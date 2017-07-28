@@ -4,6 +4,9 @@ syntax enable
 set backspace=indent,eol,start	"Make backspace behave like other editors
 set number			"Shows line line numbers in the buffer.
 
+
+set spell spelllang=en_gb
+
 " -----------------Visuals---------------- "
 so ~/.dotfiles/dotfiles.d/vimrc.d/colors/jay.vim
 hi Normal guibg=NONE ctermbg=NONE
