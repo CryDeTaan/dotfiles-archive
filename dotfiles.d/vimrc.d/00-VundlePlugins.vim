@@ -17,6 +17,9 @@ Plugin 'ctrlpvim/ctrlp.vim' " Nice fuzzy search plugin, access it using ctrl+p
 
 Plugin 'airblade/vim-gitgutter' " To the left of the numbers in Vim you will now get some gitvisuals on what has changed in the file
 
+Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen in vim
+Plugin 'vim-airline/vim-airline-themes' " vim-airline themes
+
 " Once all of the Plugins have been added following is required
 call vundle#end()            " required
 filetype plugin indent on    " required
