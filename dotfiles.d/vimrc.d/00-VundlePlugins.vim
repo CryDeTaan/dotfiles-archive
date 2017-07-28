@@ -20,6 +20,8 @@ Plugin 'airblade/vim-gitgutter' " To the left of the numbers in Vim you will now
 Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen in vim
 Plugin 'vim-airline/vim-airline-themes' " vim-airline themes
 
+Plugin 'scrooloose/syntastic' 		" Syntax checking for vim
+
 " Once all of the Plugins have been added following is required
 call vundle#end()            " required
 filetype plugin indent on    " required
