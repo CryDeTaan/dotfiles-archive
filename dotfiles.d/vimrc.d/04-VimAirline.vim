@@ -6,4 +6,4 @@ let g:airline#extensions#tabline#enabled = 1
 
 " Set Airline Theme
 
-let g:airline_theme='minimalist'
+let g:airline_theme='murmur'
