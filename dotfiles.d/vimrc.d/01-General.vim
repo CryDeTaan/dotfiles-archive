@@ -8,7 +8,7 @@ set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 set spell spelllang=en_gb
 
 " -----------------Visuals---------------- "
-so ~/.dotfiles/dotfiles.d/vimrc.d/colors/jay.vim
+"so ~/.dotfiles/dotfiles.d/vimrc.d/colors/jay.vim
 hi Normal guibg=NONE ctermbg=NONE
 
 
