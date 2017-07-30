@@ -36,6 +36,7 @@ oh_my_zsh="$HOME/.oh-my-zsh"
 zsh_rc="$HOME/.zshrc"
 vim_plugin_dir="$HOME/.vim"
 vim_rc="$HOME/.vimrc"
+tmux_conf="$HOME/.tmux.conf"
 rc_backup_dir="$HOME/.dotfiles.d/backups"
 
 # helper functions
@@ -121,6 +122,9 @@ function install_components() {
         vim)
             install_vim
         ;;
+	tmux)
+            install_tmux
+	;;
     esac
 
 }
@@ -428,6 +432,29 @@ function install_vim() {
 
 }
 
+function install_tmux() {
+
+    echo_func_start "Installing Tmux"
+
+    # make sure tmux is available
+    if ! hash tmux 2>/dev/null; then
+        echo_red "tmux is not installed or in your PATH. Not installing this configuration."
+        return
+    fi
+
+    echo_subfunc_start "Installing Tmux configuration file"
+
+    ## Backup the current one
+    if [[ -f "$tmux_conf" ]]; then
+        backup_config $tmux_conf
+    fi
+
+    echo_debug "Symlinking $gitpath/rc/tmux.conf to $tmux_conf"
+    ln -sf $gitpath/rc/tmux.conf $tmux_conf
+
+    echo_subfunc_done "Done"
+    echo_func_done "Tmux config install complete!"
+}
 
 function update_repo() {
 

@@ -3,7 +3,7 @@ syntax enable
 
 set backspace=indent,eol,start	"Make backspace behave like other editors
 set number			"Shows line line numbers in the buffer.
-
+set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 
 set spell spelllang=en_gb
 
