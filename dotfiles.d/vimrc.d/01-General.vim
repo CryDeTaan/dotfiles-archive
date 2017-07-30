@@ -9,8 +9,10 @@ set spell spelllang=en_gb
 
 " -----------------Visuals---------------- "
 "so ~/.dotfiles/dotfiles.d/vimrc.d/colors/jay.vim
-hi Normal guibg=NONE ctermbg=NONE
-
+"hi Normal guibg=NONE ctermbg=NONE
+syntax enable
+set background=dark
+colorscheme jay
 
 
 " -----------------Search----------------- "
