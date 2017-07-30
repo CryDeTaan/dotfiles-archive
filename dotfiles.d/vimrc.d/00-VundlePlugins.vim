@@ -19,7 +19,8 @@ Plugin 'airblade/vim-gitgutter' " To the left of the numbers in Vim you will now
 Plugin 'tpope/vim-fugitive' " Git wrapper for git commands within Vim
 
 Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen in vim
-Plugin 'vim-airline/vim-airline-themes' " vim-airline themes
+"Plugin 'vim-airline/vim-airline-themes' " vim-airline themes
+Plugin 'josuegaleas/jay' " Vim Colour scheme and vim-airline theme
 
 Plugin 'scrooloose/syntastic' 		" Syntax checking for vim
 
