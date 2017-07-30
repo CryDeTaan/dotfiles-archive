@@ -8,7 +8,6 @@ set spell spelllang=en_gb
 
 " -----------------Visuals---------------- "
 hi Normal guibg=NONE ctermbg=NONE 
-hi StatusLine guifg=NONE guibg=NONE
 
 
 " -----------------Search----------------- "
