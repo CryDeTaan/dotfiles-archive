@@ -23,7 +23,7 @@ gitoriginSSH="git@github.com:CryDeTaan/dotfiles.git"
 debug=false
 
 # configurations this script knows how to setup
-declare -a configurations=("all" "none" "zsh" "vim")
+declare -a configurations=("all" "none" "zsh" "vim" "tmux")
 
 # defaults for commandline options
 install_target=false
