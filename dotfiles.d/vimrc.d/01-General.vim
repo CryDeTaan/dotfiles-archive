@@ -7,6 +7,8 @@ set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 
 set spell spelllang=en_gb
 
+set term=screen-256color
+
 " -----------------Visuals---------------- "
 so ~/.dotfiles/dotfiles.d/vimrc.d/colors/jay.vim
 hi Normal guibg=NONE ctermbg=NONE
