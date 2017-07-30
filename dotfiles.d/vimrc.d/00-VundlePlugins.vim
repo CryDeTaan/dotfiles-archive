@@ -16,6 +16,7 @@ Plugin 'Xuyuanp/nerdtree-git-plugin' " This adds git status visuals to nerdtree
 Plugin 'ctrlpvim/ctrlp.vim' " Nice fuzzy search plugin, access it using ctrl+p
 
 Plugin 'airblade/vim-gitgutter' " To the left of the numbers in Vim you will now get some gitvisuals on what has changed in the file
+Plugin 'tpope/vim-fugitive' " Git wrapper for git commands within Vim
 
 Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen in vim
 Plugin 'vim-airline/vim-airline-themes' " vim-airline themes
