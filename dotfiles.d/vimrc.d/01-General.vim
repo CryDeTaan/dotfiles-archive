@@ -1,6 +1,5 @@
 syntax enable
 
-
 set backspace=indent,eol,start	"Make backspace behave like other editors
 set number			"Shows line line numbers in the buffer.
 set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
@@ -8,10 +7,8 @@ set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 set spell spelllang=en_gb
 
 " -----------------Visuals---------------- "
-hi Normal guibg=NONE ctermbg=NONE
-syntax enable
-set background=dark
-colorscheme jay
+hi Normal guibg=NONE ctermbg=NONE 
+hi StatusLine guifg=NONE guibg=NONE
 
 
 " -----------------Search----------------- "
