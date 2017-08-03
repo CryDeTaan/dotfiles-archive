@@ -7,7 +7,7 @@ set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 set spell spelllang=en_gb
 
 " -----------------Visuals---------------- "
-hi Normal guibg=NONE ctermbg=NONE 
+" hi Normal guibg=NONE ctermbg=NONE 
 
 
 " -----------------Search----------------- "
