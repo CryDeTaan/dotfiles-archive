@@ -500,7 +500,7 @@ function update_repo() {
     update_helper $vim_plugin_dir/bundle/Vundle.vim
 
     echo_yellow "Running vim plugin installer"
-    vim +PluginInstall +qall
+    vim +PluginUpdate +qall
 
     echo_subfunc_done "Done"
 
