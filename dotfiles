@@ -418,6 +418,7 @@ function install_vim() {
 
     echo_yellow "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
     ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
+    ln -sf $gitpath/config/vim/spell//* $HOME/.vim/spell/
 
     echo_subfunc_done "Done"
 
