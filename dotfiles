@@ -377,10 +377,13 @@ function install_vim() {
         return
     fi
 
-    # Ensure that *.d directory exists
+    # Ensure that directory exists
     echo_yellow "Creating *.d directory in $HOME/.dotfiles.d/vimrc.d"
     mkdir -p $HOME/.dotfiles.d/vimrc.d
 
+    # I cannot spell, so lets do this.
+    echo_yellow "Creating spell directory in $HOME/.vim/"
+    mkdir -p $HOME/.vim/spell
     echo_subfunc_done "Done"
 
     echo_subfunc_start "Installing Vim Plugins"
