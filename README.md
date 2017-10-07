@@ -6,19 +6,21 @@ This was very much inspired by @leonjza's [dotfiles](https://github.com/leonjza/
 He has obviously done a much better job at it, but I wanted to create my own, one, so that I can learn what it is all about, and two, I had some other requirements. 
 
 ## Quick Start
-Run the following command, this will add an alias called dotfiles. 
-    `alias dotfiles="bash <(curl -fsSL https://raw.githubusercontent.com/crydetaan/dotfiles/master/dotfiles)"`
+Run the following command, this will add an alias called dotfiles.
+
+    alias dotfiles="bash <(curl -fsSL https://raw.githubusercontent.com/crydetaan/dotfiles/master/dotfiles)"
 
 
 Now that you have the dotfiles alias added the following will be available. 
 
-    `dotfiles --install all`
+    dotfiles --install all
 
 I am going to assume that when you have added the alias it means that you will probably want to install the dotfiles.
 I can easily make this assumption, because if you have run the install before, an alias would have been added already as part of the rc file that gets loaded as you start a shell ;p. 
 
 ## dotfile detail
 So basically, my dotfile config includes;
+
     1. zsh with oh-my-zsh
         - Some Aliases
         - Commands that run at startup
