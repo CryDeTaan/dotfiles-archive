@@ -306,7 +306,7 @@ function install_zsh() {
 
         echo_handover "Over to git"
 
-        git clone git://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $oh_my_zsh/custom/plugins/zsh-syntax-highlighting
 
         echo_handover "Back to the script"
 
@@ -319,7 +319,7 @@ function install_zsh() {
 
         echo_handover "Over to git"
 
-        git clone git://github.com/zsh-users/zsh-autosuggestions $oh_my_zsh/custom/plugins/zsh-autosuggestions
+        git clone https://github.com/zsh-users/zsh-autosuggestions.git $oh_my_zsh/custom/plugins/zsh-autosuggestions
 
         echo_handover "Back to the script"
         

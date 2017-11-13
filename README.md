@@ -3,7 +3,7 @@
 For some time I have been using this dotfile config, but I have never set aside some time to populate the readme.
 
 This was very much inspired by @leonjza's [dotfiles](https://github.com/leonjza/dotfiles "dotfiles of @leonjza")
-He has obviously done a much better job at it, but I wanted to create my own, one, so that I can learn what it is all about, and two, I had some other requirements. 
+He has obviously done a much better job at it, but I wanted to create my own, so that I can learn what it is all about, and two, I had some other requirements. 
 
 ## Quick Start
 Run the following command, this will add an alias called dotfiles.
