@@ -33,6 +33,10 @@ nmap <Leader><space> :nohlsearch<cr>
 " Source .vimrc
 nmap <Leader>sv :so ~/.dotfiles/rc/vimrc<cr>
 
+" Working with Buffers"
+nmap <Leader>< :bp<cr>
+nmap <Leader>> :bn<cr>
+nmap <Leader>bc :bp<cr>
 
 " -------------Split Mappings------------- "
 
