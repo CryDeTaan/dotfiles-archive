@@ -357,7 +357,7 @@ function install_zsh() {
     fi
 
     echo_yellow "Symlinking zsh-theme file to $oh_my_zsh/custom/themes"
-    ln -sf $gitpath/config/oh-my-zsh/custom/themes/crydetaan.zsh-theme $oh_my_zsh/custom/themes/crydetaan.zsh-theme
+    ln -sf $gitpath/config/oh-my-zsh/custom/themes/simple.zsh-theme $oh_my_zsh/custom/themes/simple.zsh-theme
 
     echo_subfunc_done "Done"
 
