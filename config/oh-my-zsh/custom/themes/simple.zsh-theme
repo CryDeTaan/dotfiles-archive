@@ -15,4 +15,4 @@ ${ret_status} '
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[078]%}git:(%{$fg[red]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$FG[214]%}*%{$FG[078]%})"
-ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[078]%})"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$FG[078]%})"
