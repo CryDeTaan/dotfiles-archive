@@ -338,7 +338,10 @@ function install_zsh() {
         echo_subfunc_done "Done"
     fi
 
-    
+    ## Adding empty local_aliases.zsh
+    touch $gitpath/dotfiles.d/zshrc.d/local_aliases.zsh
+
+    ## Creating symlinks
     echo_subfunc_start "Creating symlinks"
 
     echo_debug "Symlinking $gitpath/rc/zshrc to $zsh_rc"
