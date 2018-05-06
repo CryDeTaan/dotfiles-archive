@@ -1,7 +1,7 @@
 # Main file for setting some exports and sourcing some other files. 
 
 # Adding Composer to $PATH if running on system
-which composer > /dev/null && export PATH="$HOME/.composer/vendor/bin:$PATH"
+which composer 2>/dev/null && export PATH="$HOME/.composer/vendor/bin:$PATH"
 
 # Some OS specific sourcing.
 # My OS of choice is MacOS or CentOS(most distros probably),
@@ -24,4 +24,4 @@ case "$OSTYPE" in
 esac
 
 # The following is required for the python virtualenvwrapper
-which virtualenv > /dev/null && export WORKON_HOME=$HOME/.virtualenvs && export PROJECT_HOME=$HOME/Devel
+which virtualenv 2>/dev/null && export WORKON_HOME=$HOME/.virtualenvs && export PROJECT_HOME=$HOME/Devel
