@@ -20,6 +20,7 @@ case "$OSTYPE" in
 
     # CentOS
     linux*) 
+        which python3.6 > /dev/null 2>&1 && export VIRTUALENVWRAPPER_PYTHON="$(command \which python3.6)"
         which virtualenv > /dev/null 2>&1 && source /usr/bin/virtualenvwrapper.sh && export WORKON_HOME=$HOME/.virtualenvs && export PROJECT_HOME=$HOME/Devel
         ;;
 esac
