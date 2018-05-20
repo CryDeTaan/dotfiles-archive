@@ -29,7 +29,7 @@ case "$OSTYPE" in
         which virtualenv > /dev/null 2>&1 && source /usr/bin/virtualenvwrapper.sh && export WORKON_HOME=$HOME/.virtualenvs && export PROJECT_HOME=$HOME/Devel
 
         # Adding Composer to $PATH if running on system
-        which composer > /dev/null 2>&1 && export PATH="$HOME/.composer/vendor/bin:$PATH"
+        which composer > /dev/null 2>&1 && export PATH="$HOME/.config/composer/vendor/bin:$PATH"
         
         ;;
 esac
