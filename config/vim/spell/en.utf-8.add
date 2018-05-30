@@ -42,7 +42,6 @@ b
 o
 constraining
 setw
-a a
 Vi
 copypaste
 vi
@@ -55,20 +54,15 @@ j
 k
 R
 config
-a a
-a a
-a a
 color
 rm
 r
-a a
 RunAsAdministrator
 ps1
 luckystrike
 PSSQLite
 admin
 db
-curi0usJack
 requiredmodules
 PSSQlite
 installfolder
