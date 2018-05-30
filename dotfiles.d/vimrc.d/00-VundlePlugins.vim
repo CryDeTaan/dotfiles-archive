@@ -20,9 +20,10 @@ Plugin 'tpope/vim-fugitive' " Git wrapper for git commands within Vim
 
 Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen in vim
 "Plugin 'vim-airline/vim-airline-themes' " vim-airline themes
-Plugin 'josuegaleas/jay' " Vim Colour scheme and vim-airline theme
+"Plugin 'josuegaleas/jay' " Vim Colour scheme and vim-airline theme
 
 Plugin 'scrooloose/syntastic' 		" Syntax checking for vim
+Plugin 'vim-python/python-syntax' 		" Syntax checking for vim
 
 " Once all of the Plugins have been added following is required
 call vundle#end()            " required

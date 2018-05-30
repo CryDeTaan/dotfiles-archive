@@ -389,6 +389,12 @@ function install_vim() {
     mkdir -p $HOME/.vim/spell
     echo_subfunc_done "Done"
 
+    # Set color scheme.
+    echo_yellow "Creating color scheme directories in $HOME/.vim/"
+    mkdir -p $HOME/.vim/colors/
+    mkdir -p $HOME/.vim/autoload/airline/themes
+    echo_subfunc_done "Done"
+
     echo_subfunc_start "Installing Vim Plugins"
 
     echo_yellow "Preparing the vim plugin directory at $vim_plugin_dir"
@@ -423,8 +429,10 @@ function install_vim() {
     ln -sf $gitpath/rc/vimrc $vim_rc
 
     echo_yellow "Symlinking *.vim files to $HOME/.dotfiles.d/vimrc.d/"
-    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d
-    ln -sf $gitpath/config/vim/spell//* $HOME/.vim/spell/
+    ln -sf $gitpath/dotfiles.d/vimrc.d/* $HOME/.dotfiles.d/vimrc.d/
+    ln -sf $gitpath/config/vim/spell/* $HOME/.vim/spell/
+    ln -sf $gitpath/config/vim/colors/colorscheme.vim $HOME/.vim/colors/
+    ln -sf $gitpath/config/vim/colors/airline_theme.vim $HOME/.vim/autoload/airline/themes/
 
     echo_subfunc_done "Done"
 
