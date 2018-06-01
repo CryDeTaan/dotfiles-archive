@@ -6,9 +6,11 @@ set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 
 set cursorline 
 
-set spell spelllang=en_gb
-
 let g:python_highlight_all = 1
+
+"set spell spelllang=en_gb
+
+
 " -----------------Visuals---------------- "
 " hi Normal guibg=NONE ctermbg=NONE 
 
@@ -22,23 +24,26 @@ set incsearch	"Start highlighting first occurrence of match as typing happens
 " ----------------Mappings---------------- "
 
 " Set the <Leader Variable. The default is '\', so if unset <leader> = '\'.
-let mapleader = ','
+let mapleader = '`'
+
+" Source .vimrc
+nmap <Leader>vs :so ~/.dotfiles/rc/vimrc<cr>
 
 " Edit the vimrc file as part of the .dotfiles setup
-nmap <Leader>ev :tabedit ~/.dotfiles/rc/vimrc<cr>
-
-" Close the current tab
-nmap <Leader>ct :tabc<cr>
+nmap <Leader>ve :tabedit ~/.dotfiles/dotfiles.d/vimrc.d/01-General.vim<cr>
 
 "Remove search highlightling, default is to remain highlighted untill new search is performed. 
 nmap <Leader><space> :nohlsearch<cr>
 
-" Source .vimrc
-nmap <Leader>sv :so ~/.dotfiles/rc/vimrc<cr>
+" Enable spell check
+nmap <Leader>sc :set spell spelllang=en_gb<cr>
+
+" Close the current tab
+nmap <Leader>ct :tabc<cr>
 
 " Working with Buffers"
-nmap <Leader>< :bp<cr>
-nmap <Leader>> :bn<cr>
+nmap <Leader>, :bp<cr>
+nmap <Leader>. :bn<cr>
 nmap <Leader>bc :bp<cr>
 
 " -------------Split Mappings------------- "
@@ -49,9 +54,9 @@ set splitright
 "nmap <C-
 "Something is still missing here. Time will tell ;p
 
-
-
-
+" --------------Auto Commands------------- "
+"cnoremap w!! execute 'silent! write !sudo tee % >/dev/null' <bar> edit!
+command! W :execute ':silent w !sudo tee % > /dev/null' | :q!
 
 " --------------Auto Commands------------- "
 
@@ -60,6 +65,6 @@ set splitright
 "This clears the group otherwise the group will be loaded again in the same group.
 augroup autosourcing
 	autocmd!  
-	autocmd BufWritePost ~/.dotfiles/rc/vimrc source %
+	autocmd! BufWritePost ~/.dotfiles/rc/vimrc source %
 augroup END
 
