@@ -14,17 +14,21 @@ let g:python_highlight_all = 1
 " -----------------Visuals---------------- "
 " hi Normal guibg=NONE ctermbg=NONE 
 
+" ----------------Mappings---------------- "
+
+" Set the <Leader Variable. The default is '\', so if unset <leader> = '\'.
+let mapleader = ','
+
 
 " -----------------Search----------------- "
 
 set hlsearch	"Enable search highlighting.
 set incsearch	"Start highlighting first occurrence of match as typing happens
 
+"Remove search highlighting, default is to remain highlighted until new search is performed. 
+nmap <Leader><space> :nohlsearch<cr>
 
-" ----------------Mappings---------------- "
-
-" Set the <Leader Variable. The default is '\', so if unset <leader> = '\'.
-let mapleader = '`'
+" ----------------VIM---------------- "
 
 " Source .vimrc
 nmap <Leader>vs :so ~/.dotfiles/rc/vimrc<cr>
@@ -32,12 +36,20 @@ nmap <Leader>vs :so ~/.dotfiles/rc/vimrc<cr>
 " Edit the vimrc file as part of the .dotfiles setup
 nmap <Leader>ve :tabedit ~/.dotfiles/dotfiles.d/vimrc.d/01-General.vim<cr>
 
-"Remove search highlightling, default is to remain highlighted untill new search is performed. 
-nmap <Leader><space> :nohlsearch<cr>
+" ------------------Misc.----------------- "
+
+" Esc in insert mode.
+:inoremap jj <Esc>
+
+" ----------------Spelling---------------- "
 
 " Enable spell check
-nmap <Leader>sc :set spell spelllang=en_gb<cr>
+nmap <silent> <Leader>sc :set spell spelllang=en_gb <bar> set nocursorline<cr>
 
+" Disable spell check
+nmap <silent> <Leader>sco :set nospell <bar> set cursorline<cr>
+
+" ----------------Tabs and buffers---------------- "
 " Close the current tab
 nmap <Leader>ct :tabc<cr>
 
@@ -47,7 +59,6 @@ nmap <Leader>. :bn<cr>
 nmap <Leader>bc :bp<cr>
 
 " -------------Split Mappings------------- "
-
 set splitbelow
 set splitright
 
