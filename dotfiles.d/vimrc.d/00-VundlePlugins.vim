@@ -18,14 +18,12 @@ Plugin 'ctrlpvim/ctrlp.vim' " Nice fuzzy search plugin, access it using ctrl+p
 Plugin 'airblade/vim-gitgutter' " To the left of the numbers in Vim you will now get some gitvisuals on what has changed in the file
 Plugin 'tpope/vim-fugitive' " Git wrapper for git commands within Vim
 
+Plugin 'tpope/vim-surround' "Surroundings parentheses, brackets, quotes, XML tags, and more.
+
 Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen in vim
 
 Plugin 'scrooloose/syntastic' 		" Syntax checking for vim
 Plugin 'vim-python/python-syntax' 		" Syntax checking for vim
-
-Plugin 'Valloric/YouCompleteMe' " Syntax autocomplete script
-
-Plugin 'liuchengxu/vim-which-key' " Displays available keybindings in popup.
 
 " Once all of the Plugins have been added following is required
 call vundle#end()            " required
