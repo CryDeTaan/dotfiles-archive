@@ -25,6 +25,8 @@ Plugin 'vim-airline/vim-airline' " Status/tab line at the bottom of the screen i
 Plugin 'scrooloose/syntastic' 		" Syntax checking for vim
 Plugin 'vim-python/python-syntax' 		" Syntax checking for vim
 
+Plugin 'qpkorr/vim-bufkill'
+
 " Once all of the Plugins have been added following is required
 call vundle#end()            " required
 filetype plugin indent on    " required
