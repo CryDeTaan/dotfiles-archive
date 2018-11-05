@@ -8,6 +8,3 @@ colorscheme colorscheme
 " Setting airline theme, again edit the file in the config directory of the
 " dotfiles collection. Theme name is airline_theme
 let g:airline_theme='airline_theme'
-
-
-

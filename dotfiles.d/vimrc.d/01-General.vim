@@ -3,13 +3,14 @@ syntax enable
 set backspace=indent,eol,start	"Make backspace behave like other editors
 set number			"Shows line line numbers in the buffer.
 set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
+set laststatus=2
 
 set cursorline 
 
 let g:python_highlight_all = 1
 
 "set spell spelllang=en_gb
-
+set noshowmode
 
 " -----------------Visuals---------------- "
 " hi Normal guibg=NONE ctermbg=NONE 
@@ -34,7 +35,8 @@ nmap <Leader><space> :nohlsearch<cr>
 nmap <Leader>vs :so ~/.dotfiles/rc/vimrc<cr>
 
 " Edit the vimrc file as part of the .dotfiles setup
-nmap <Leader>ve :tabedit ~/.dotfiles/dotfiles.d/vimrc.d/01-General.vim<cr>
+"nmap <Leader>ve :tabedit ~/.dotfiles/dotfiles.d/vimrc.d/01-General.vim<cr>
+nmap <Leader>ve :tabedit ~/.dotfiles/dotfiles.d/vimrc.d/<cr>
 
 " ------------------Misc.----------------- "
 
