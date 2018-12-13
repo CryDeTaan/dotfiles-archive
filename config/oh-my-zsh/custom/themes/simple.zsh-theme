@@ -30,7 +30,7 @@ zle -N zle-keymap-select
 # right prompt
 if type "virtualenv_prompt_info" > /dev/null
 then
-	RPROMPT='$(virtualenv_prompt_info)$my_gray%n@%m%{$reset_color%}%'
+	RPROMPT='$my_gray$(virtualenv_prompt_info) %n@%m%{$reset_color%}%'
 else
 	RPROMPT='$my_gray%n@%m%{$reset_color%}%'
 fi

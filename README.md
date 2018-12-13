@@ -1,9 +1,6 @@
 # .dotfiles
 
-For some time I have been using this dotfile config, but I have never set aside some time to populate the readme.
-
-This was very much inspired by @leonjza's [dotfiles](https://github.com/leonjza/dotfiles "dotfiles of @leonjza")
-He has obviously done a much better job at it, but I wanted to create my own, so that I can learn what it is all about, and two, I had some other requirements. 
+This is a collection of my dotfiles which I have been using over the years, its gone through some changes as I change the way I work. Its probably far from perfect :)
 
 ## Quick Start
 Run the following command, this will add an alias called dotfiles.
@@ -11,12 +8,11 @@ Run the following command, this will add an alias called dotfiles.
     alias dotfiles="bash <(curl -fsSL https://raw.githubusercontent.com/crydetaan/dotfiles/master/dotfiles)"
 
 
-Now that you have the dotfiles alias added the following will be available. 
+Now that you have the dotfiles alias added the following will be available.
 
     dotfiles --install all
 
-I am going to assume that when you have added the alias it means that you will probably want to install the dotfiles.
-I can easily make this assumption, because if you have run the install before, an alias would have been added already as part of the rc file that gets loaded as you start a shell ;p. 
+No need to add the alias everytime to run one of the dotfils, the installation adds a persistent dotfiles command.
 
 ## dotfile detail
 So basically, my dotfile config includes;
@@ -24,20 +20,22 @@ So basically, my dotfile config includes;
     1. zsh with oh-my-zsh
         - Some Aliases
         - Commands that run at startup
-        - Some exports I want everytime the shell starts up 
+        - Some exports I want everytime the shell starts up
         - Some stuff I want to make happen at startup
 
     2. vim
+        # Since December 2018 I moved back to a single vimrc file as I felt like everytime I have to edit something in my vimrc finding the right file becomes a pain.
+
         - I have some plugins enabled using vundel
-        - Plugins: Airline, Nerdtree, Syntastic, ctrlp
-        - Some General config, 
-        - Using the Jay Colour Scheme
-        - Oh, and I suck at spelling, so there is that. 
+        - Plugins: Maybe to many, check the vimrc
+        - Some General config,
+        - Custom colour scheme
+        - Oh, and I suck at spelling, so there is that (not enabled by default - use ',esc' and ',dsc').
 
     3. tmux
         - Just a rc with all the configs for tmux.
 
-I will try and add all the details for each in, either; the individual rc, or the dotfiles.d config files.
+I will try and add more detail for each in, either; the individual rc, or the dotfiles.d config files.
 
 ## Other usage options
 ```
