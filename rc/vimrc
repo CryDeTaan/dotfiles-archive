@@ -1,39 +1,292 @@
-" ------------Vimrc------------ "
-" This is the vim rc configuration file. 
-" All setting will be instantiated from
-" from this file.
-"
-" Most settings will really be made
-" from outside of this file.
-" 
-" Here we will set some initial items and then load all 
-" the custom config files afterwards.
+"   ____            ____      _____                 _      __     ___
+"  / ___|_ __ _   _|  _ \  __|_   _|_ _  __ _ _ __ ( )___  \ \   / (_)_ __ ___
+" | |   | '__| | | | | | |/ _ \| |/ _` |/ _` | '_ \|// __|  \ \ / /| | '_ ` _ \
+" | |___| |  | |_| | |_| |  __/| | (_| | (_| | | | | \__ \   \ V / | | | | | | |
+"  \____|_|   \__, |____/ \___||_|\__,_|\__,_|_| |_| |___/    \_/  |_|_| |_| |_|
+"             |___/
 
-
-" ------------Vundle----------- "
-
-" Some settings required by Vundle before loading plugins.
-
-set nocompatible              " required
-filetype off                  " required
+" ---------- Vundle ---------- "
+filetype off    " required
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required.
+Plugin 'VundleVim/Vundle.vim'
+
+" Auto completion and code guidance.
+Plugin 'davidhalter/jedi-vim'
+
+" Insert or delete brackets, parens, quotes in pair.
+Plugin 'jiangmiao/auto-pairs'
+
+" Comment stuff out.
+Plugin 'tpope/vim-commentary'
+
+" Surroundings parentheses, brackets, quotes, etc.
+Plugin 'tpope/vim-surround'
+
+" Displays available keybindings in popup.
+Plugin 'liuchengxu/vim-which-key'
+
+" Shows a git diff in the gutter (sign column) and stages/undoes hunks.
+Plugin 'airblade/vim-gitgutter'
+
+" Git wrapper for vim.
+Plugin 'tpope/vim-fugitive'
+
+" Unload, delete or wipe a buffer without closing the window or split.
+Plugin 'qpkorr/vim-bufkill'
+
+" Status/tabline for vim.
+Plugin 'vim-airline/vim-airline'
+
+" Classic style directory structure view/pane on the left, access it using ctrl+t
+Plugin 'scrooloose/nerdtree'
+
+" This adds git status visuals to nerdtree
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+
+" Syntax checking for vim
+Plugin 'vim-syntastic/syntastic'
+
+" Syntax checking for vim
+Plugin 'vim-python/python-syntax'
+
+" Snippet engin
+Plugin 'SirVer/ultisnips'
+
+" Snippet lib
+Plugin 'honza/vim-snippets'
+
+" Automatically save changes to disk in Vim
+Plugin '907th/vim-auto-save'
+
+Plugin 'etdev/vim-hexcolor'
+"Vim plugin that runs the currently open file through Flake8.
+" Plugin 'nvie/vim-flake8'
+
+call vundle#end()            " required
+filetype plugin indent on    " required
 
 
-" ------------Config----------- "
+" ----------------Vim Settings---------------- "
+" Set the <Leader Variable. The default is '\', so if unset <leader> = '\'.
+let mapleader = ','
 
-" Here we will load custom configuration.
-" To add extra configurations, add the files: 
-"   ~/.dotfiles.d/vimrc.d/
-" NOTE:
-" Number the files in the order you want it loaded, 
-" By default files will be loaded randomly.
-" The file name should end with .vim to load correctly.
-" For Example:
-"   00-VundlePlugins.vim
-"   01-General.vim	 
+" Make use of spaces when using tab, but still backpace spaces as tabs.
+set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
 
-for f in split(glob('~/.dotfiles.d/vimrc.d/*.vim'), '\n')
-    exe 'source' f
-endfor
+"Make backspace behave like other editors
+set backspace=indent,eol,start
+
+" Source vim configuration upon save
+if has ('autocmd') " Remain compatible with earlier versions
+ augroup vimrc
+    autocmd! BufWritePost $MYVIMRC source % | echo "Reloaded " . $MYVIMRC | redraw
+  augroup END
+endif " has autocmd
+
+" Opening Vim help in a vertical split window
+" See the following for alternatives:
+" https://stackoverflow.com/questions/630884/opening-vim-help-in-a-vertical-split-window
+autocmd FileType help wincmd L
+
+" ----------------Spell checking---------------- "
+" Enable spell check
+nmap <silent> <Leader>esc :set spell spelllang=en_gb <bar> set nocursorline<cr>
+
+" Disable spell check
+nmap <silent> <Leader>dsc :set nospell <bar> set cursorline<cr>
+
+" ----------------Vim Visuals---------------- "
+" Custom theme
+colorscheme crydetaan
+
+syntax enable       " Syntax highlighting
+set number          " Shows line line numbers in the buffer.
+set laststatus=2    " Show Status line, also required by Vim Airline.
+set cursorline      " Shows cursorline
+
+
+" ----------------WhichKey Settings---------------- "
+" vim-which-key displays available keybindings in popup.
+" Use leader key to trigger vim-which-key, a guide buffer will pop up when no further keystrokes within timeoutlen.
+" By default timeoutlen is 1000 ms
+" set timeoutlen=500
+nnoremap <leader> :<C-U>WhichKey ','<CR>
+
+" Disable statusline for WhichKey
+autocmd! FileType which_key
+autocmd  FileType which_key set laststatus=0 noshowmode noruler
+  \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
+
+" Define prefix dictionary
+let g:which_key_map =  {}
+
+" To make the guide pop up Register the description dictionary for the prefix
+" first.
+call which_key#register(',', "g:which_key_map")
+
+
+" ----------------Vim Mappings---------------- "
+" Esc in insert mode.
+:inoremap jj <Esc>
+
+" Edit vim config
+nmap <Leader>ve :tabedit ~/.vimrc<cr>
+
+" WhichKey description dictionary defeniion for the key bindings starting with 'v'
+let g:which_key_map.v = {
+      \ 'name' : '+vim',
+      \ 'e' : 'Edit vimrc'
+      \ }
+
+
+" ----------------Tabs, buffers, and windows---------------- "
+" Close the current tab
+nmap <Leader>tc :tabc<cr>
+
+" WhichKey description dictionary defeniion for the key bindings starting with 't'
+let g:which_key_map.t = {
+      \ 'name' : '+tabs',
+      \ 'c' : 'Close tab'
+      \ }
+
+
+" Close the current buffer
+nmap <C-c> :BD<cr> " Delete a file from the buffer via vim-bufkill
+
+" Working with Buffers"
+nmap <silent> <C-n> :bn<cr>
+nmap <silent> <C-p> :bp<cr>
+
+" WhichKey description dictionary defeniion for the key bindings starting with 'b'
+let g:which_key_map.b = {
+      \ 'name' : '+buffers',
+      \ 'c' : 'Close buffer'
+      \ }
+
+
+" ----------------NERDTree Settings---------------- "
+" Open/close NERDTree Tabs with ctl-t
+nmap <silent> <C-t> :NERDTreeToggle<CR>
+
+" Move to NerdTree
+nmap <silent> <C-f> :NERDTreeFocus<CR>
+
+let NERDTreeMinimalUI = 1
+let NERDTreeDirArrows = 1
+
+if has('autocmd')
+    augroup crydetaan
+        autocmd!
+        autocmd User NERDTreeInit call crydetaan#autocmds#attempt_select_last_file()
+    augroup END
+endif
+
+nnoremap <silent> - :silent edit <C-R>=empty(expand('%'))  ? !." : expand('%:p:h')<CR><CR>
+
+" ----------------Airline Settings---------------- "
+"  Some nice upgrades for the standard status bar.
+let g:airline_theme = 'crydetaan'                       " Theme, but custom theme to follow.
+set noshowmode                                          " Let Airline handle the mode visuals.
+
+let g:airline#extensions#tabline#enabled = 1            " Enables the tab line, to see tabs and buffers at the top.
+let g:airline#extensions#tabline#show_tabs = 1          " Displaying tabs, regardless of number.
+let g:airline#extensions#tabline#show_close_button = 0  " Configure whether close button should be shown.
+
+
+let g:airline#extensions#tabline#buffer_idx_mode = 0    " Displaying index of the buffer.
+nmap <leader>1 <Plug>AirlineSelectTab1
+nmap <leader>2 <Plug>AirlineSelectTab2
+nmap <leader>3 <Plug>AirlineSelectTab3
+nmap <leader>4 <Plug>AirlineSelectTab4
+nmap <leader>5 <Plug>AirlineSelectTab5
+nmap <leader>6 <Plug>AirlineSelectTab6
+nmap <leader>7 <Plug>AirlineSelectTab7
+nmap <leader>8 <Plug>AirlineSelectTab8
+nmap <leader>9 <Plug>AirlineSelectTab9
+nmap <leader>- <Plug>AirlineSelectPrevTab
+nmap <leader>+ <Plug>AirlineSelectNextTab
+
+" ----------------Split Config---------------- "
+" Specify the areas of the screen where the splits should occur
+set splitbelow
+set splitright
+
+"split navigations
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
+
+" -----------------Search----------------- "
+
+set hlsearch	" Enable search highlighting.
+set incsearch	" Start highlighting first occurrence of match as typing happens
+set ignorecase	" Ignore case in vim search.
+
+
+"Remove search highlighting, default is to remain highlighted until new search is performed.
+nmap <silent> <Leader><space> :nohlsearch<cr>
+
+" Sets search to be case sensitive
+nmap <Leader>sc :set noignorecase<cr>
+
+" Sets search to be case insensitive
+nmap <Leader>si :set ignorecase<cr>
+
+" WhichKey description dictionary defeniion for the key bindings starting with 's'
+let g:which_key_map.s = {
+      \ 'name' : '+search',
+      \ 'c' : 'Search case sensitive',
+      \ 'i' : 'Search case insensitive',
+      \ }
+
+
+" -----------------Syntastic----------------- "
+" Syntax checking plugin for Vim
+
+let g:syntastic_loc_list_height = 5
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+" Always show the sign colomn so that sytastic and gitgutter doesn't move the screen
+set signcolumn=yes
+
+" -----------------Python----------------- "
+" Enable all Python syntax highlighting features.
+let g:python_highlight_all = 1
+
+" Run the python code
+autocmd BufWinEnter *.py nnoremap <silent> <F5> <Esc>:w<CR>:!clear;python %<CR>
+
+" autocmd BufWritePost *.py call Flake8()
+
+
+
+" -----------------Snippets----------------- "
+"  Snippet mappings
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+
+" Set Python version.
+let g:UltiSnipsUsePythonVersion = 3
+
+
+" -----------------AutoSave----------------- "
+" AutoSave - automatically saves changes to disk without having to use :w
+" let g:auto_save = 1  " enable AutoSave on Vim startup
